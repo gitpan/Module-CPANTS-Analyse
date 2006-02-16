@@ -10,7 +10,7 @@ use Carp;
 use Module::CPANTS::Kwalitee;
 
 use vars qw($VERSION);
-$VERSION=0.50;
+$VERSION=0.51;
 
 use Module::Pluggable search_path=>['Module::CPANTS::Kwalitee'];
 
@@ -180,11 +180,7 @@ http://cpants.perl.org/
 
 =head1 BUGS
 
-Please report any bugs or feature requests, or send any patches, to
-bug-module-cpants-analyse at rt.cpan.org, or through the web interface at
-http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Module-CPANTS-Analyse.
-I will be notified, and then you'll automatically be notified of progress
-on your bug as I make changes.
+use RT
 
 =head1 AUTHOR
 

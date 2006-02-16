@@ -2,7 +2,7 @@ package Module::CPANTS::Kwalitee::Prereq;
 use warnings;
 use strict;
 use File::Spec::Functions qw(catfile);
-use YAML qw(:all);
+use YAML qw(LoadFile);
 
 sub order { 100 }
 
@@ -72,12 +72,14 @@ sub analyse {
 
 sub kwalitee_indicators{
     return [
-#        {
-#            name=>'is_prereq',
-#            error=>q{This distribution is not required by another distribution by another author.},
-#            remedy=>q{Convince / force / bribe another CPAN author to use this distribution.},
-#            code=>sub {
-#                return 0;               
+        {
+            name=>'is_prereq',
+            error=>q{This distribution is not required by another distribution by another author.},
+            remedy=>q{Convince / force / bribe another CPAN author to use this distribution.},
+            code=>sub {
+                return 0;
+
+                
                 #my $d=shift;
                 #my $pauseid=$d->author->pauseid;
                 #my $it=Module::CPANTS::DB::Dist->search_required_by_otherauthor(
@@ -85,8 +87,8 @@ sub kwalitee_indicators{
                     #);
                     #my $required=$it->count;
                     #return 1 if $required;
-#            },
-#        },
+            },
+        },
     ];
 }
 

@@ -1,10 +1,18 @@
 #-----------------------------------------------------------------
-# Changes for Module::CPANTS::Generator
-# $Rev: 1744 $
-# $Date: 2005-10-01T19:10:33.895811Z $ 
+# Changes for Module::CPANTS::Analyse
+# $Rev: 254 $
+# $Date: 2006-02-16 08:48:01 +0100 (Thu, 16 Feb 2006) $ 
 #-----------------------------------------------------------------
+
+0.51   2006-02-16
+  - adapted Module::CPANTS::Kwalitee::Prereq to work with newer versions
+    of YAML (reported by Andreas Koenig as RT #17670)
+
+
+0.50   2006-01-26
+  - first release to CPAN
 
 
 0.01    
-    * started rewrite
+  - started rewrite
 

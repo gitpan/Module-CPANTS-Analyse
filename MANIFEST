@@ -9,9 +9,7 @@ lib/Module/CPANTS/Kwalitee/FindModules.pm
 lib/Module/CPANTS/Kwalitee/Pod.pm
 lib/Module/CPANTS/Kwalitee/Prereq.pm
 lib/Module/CPANTS/Kwalitee/Uses.pm
-Makefile.PL
 MANIFEST			This list of files
-META.yml
 README
 t/00_load.t
 t/99_pod.t
@@ -26,3 +24,5 @@ t/testfile.t
 t/unpack.t
 t/unpack_notextractable.t
 TODO
+META.yml
+Makefile.PL
