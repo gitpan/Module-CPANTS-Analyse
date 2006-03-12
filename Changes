@@ -1,9 +1,18 @@
 #-----------------------------------------------------------------
 # Changes for Module::CPANTS::Analyse
-# $Rev: 254 $
-# $Date: 2006-02-16 08:48:01 +0100 (Thu, 16 Feb 2006) $ 
+# $Rev: 3828 $
+# $Date: 2006-03-12T16:23:27.822845Z $ 
 #-----------------------------------------------------------------
 
+0.52    2006-03-12
+  - added some dependencies to Build.PL/META.yml (thanks to Achim Grolms 
+    and BLBLACK (RT #17977))
+  - enhanced output of cpants_lint.pl (list failed tests)
+  - MCK::FindModules: die if we cannot find a namespace
+  - MCK::FindModules: remove stuff that doesn't seems to be namespace (eg lowercase) from module names
+  - changed the name of some fields to work with the (upcoming) DB
+  - added some tests
+  
 0.51   2006-02-16
   - adapted Module::CPANTS::Kwalitee::Prereq to work with newer versions
     of YAML (reported by Andreas Koenig as RT #17670)

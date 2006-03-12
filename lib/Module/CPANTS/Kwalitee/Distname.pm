@@ -22,13 +22,13 @@ sub analyse {
     my $ext=$di->extension || 'unknown';
     
     $me->d->{package}=$di->filename;
-    $me->d->{dist}=$di->distvname;
+    $me->d->{vname}=$di->distvname;
     $me->d->{extension}=$ext;
     $me->d->{version}=$di->version;
     $me->d->{version_major}=$major;
     $me->d->{version_minor}=$minor;
-    $me->d->{dist_without_version}=$di->dist;
-    $me->d->{pauseid}=$di->cpanid;
+    $me->d->{dist}=$di->dist;
+    $me->d->{author}=$di->cpanid;
 
     unless($me->d->{package}) {
         $me->d->{package}=$me->tarball;

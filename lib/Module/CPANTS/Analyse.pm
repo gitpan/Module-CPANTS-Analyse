@@ -10,7 +10,7 @@ use Carp;
 use Module::CPANTS::Kwalitee;
 
 use vars qw($VERSION);
-$VERSION=0.51;
+$VERSION=0.52;
 
 use Module::Pluggable search_path=>['Module::CPANTS::Kwalitee'];
 
@@ -32,7 +32,7 @@ sub new {
 
 sub unpack {
     my $me=shift;
-    return unless $me->dist;
+    return 'cant find dist' unless $me->dist;
 
     copy($me->dist,$me->testfile);
     chdir($me->testdir); 
@@ -55,7 +55,7 @@ sub unpack {
         $me->d->{extracts_nicely}=1 if $di->distvname eq $stuff[0];
         
     } else {
-        die "SUCKER!";
+        return "SUCKER! ".$me->dist."\n";
         #$dist->testdir($testdir);
     }
     return;
@@ -180,7 +180,11 @@ http://cpants.perl.org/
 
 =head1 BUGS
 
-use RT
+Please report any bugs or feature requests, or send any patches, to
+bug-module-cpants-analyse at rt.cpan.org, or through the web interface at
+http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Module-CPANTS-Analyse.
+I will be notified, and then you'll automatically be notified of progress
+on your bug as I make changes.
 
 =head1 AUTHOR
 

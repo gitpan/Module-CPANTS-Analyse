@@ -1,7 +1,7 @@
 package Module::CPANTS::Kwalitee::FindModules;
 use warnings;
 use strict;
-
+use Data::Dumper;
 sub order { 30 }
 
 ##################################################################
@@ -11,14 +11,14 @@ sub order { 30 }
 sub analyse {
     my $class=shift;
     my $me=shift;
-    
     my $files=$me->d->{files_array};
     
     my @modules_basedir=grep {/^[^\/]+\.pm$/} @$files;
     if (@modules_basedir) {
-        my $namespace=$me->d->{dist_without_version} || 'unkown';
+        my $namespace=$me->d->{dist} || die 'unknown namespace '.Dumper($me);
         $namespace=~s/-[^-]+$//;
         $namespace=~s/-/::/g;
+
         foreach my $file (@modules_basedir) {
             my $module=$namespace."::".$file;
             $module=~s/\.pm$//;
@@ -56,7 +56,9 @@ sub analyse {
             next if $file=~m{/test/};
             $file=~m|(.*)\.pm$|;
             my $module=$1;
+            $module=~s|^[a-z]+/||;  # remove lowercase prefixes which most likely are not part of the distname (but something like 'src/')
             $module=~s|/|::|g;
+
             push(@{$me->d->{modules}},
                 {
                     module=>$module,

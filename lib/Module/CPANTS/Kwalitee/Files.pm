@@ -85,12 +85,14 @@ sub analyse {
     my $mtime=0;
     foreach (@files) {
         next if /\//;
-        my $stat=stat(catfile($distdir,$_)) || die ("dfg $_ $!");
+        my $to_stat=catfile($distdir,$_);
+        next unless -e $to_stat; # TODO hmm, warum ist das kein File?
+        my $stat=stat($to_stat);
         my $thismtime=$stat->mtime;
         $mtime=$thismtime if $mtime<$thismtime;
     }
-    $me->d->{released_epoch}=$mtime;
-    $me->d->{released_date}=scalar localtime($mtime);
+    #$me->d->{released_epoch}=$mtime;
+    $me->d->{released}=scalar localtime($mtime);
     
     return;
 }
