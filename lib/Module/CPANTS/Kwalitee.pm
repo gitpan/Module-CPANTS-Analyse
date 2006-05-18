@@ -50,6 +50,10 @@ sub get_indicators_hash {
     return \%indicators;
 }
 
+sub available_kwalitee {
+    return scalar @{shift->get_indicators};
+}
+
 
 q{Favourite record of the moment:
   Jahcoozi: Pure Breed Mongrel};

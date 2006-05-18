@@ -12,6 +12,8 @@ sub analyse {
     my $class=shift;
     my $me=shift;
     my $files=$me->d->{files_array};
+   
+    # use provides (META.yml) if available
     
     my @modules_basedir=grep {/^[^\/]+\.pm$/} @$files;
     if (@modules_basedir) {
@@ -54,6 +56,7 @@ sub analyse {
             next unless $file=~/\.pm$/;
             next if $file=~m{/t/};
             next if $file=~m{/test/};
+            next if $file=~m{/inc/};   # skip Module::Install stuff
             $file=~m|(.*)\.pm$|;
             my $module=$1;
             $module=~s|^[a-z]+/||;  # remove lowercase prefixes which most likely are not part of the distname (but something like 'src/')

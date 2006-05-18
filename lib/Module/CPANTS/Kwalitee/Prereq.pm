@@ -72,21 +72,14 @@ sub analyse {
 
 sub kwalitee_indicators{
     return [
-#        {
-#            name=>'is_prereq',
-#            error=>q{This distribution is not required by another distribution by another author.},
-#            remedy=>q{Convince / force / bribe another CPAN author to use this distribution.},
-#            code=>sub {
-#                return 0;               
-                #my $d=shift;
-                #my $pauseid=$d->author->pauseid;
-                #my $it=Module::CPANTS::DB::Dist->search_required_by_otherauthor(
-                    #    $dist->id,$pauseid
-                    #);
-                    #my $required=$it->count;
-                    #return 1 if $required;
-#            },
-#        },
+        {
+            name=>'is_prereq',
+            error=>q{This distribution is not required by another distribution by another author.},
+            remedy=>q{Convince / force / bribe another CPAN author to use this distribution.},
+            code=>sub {
+                return 0;               
+            },
+        },
     ];
 }
 

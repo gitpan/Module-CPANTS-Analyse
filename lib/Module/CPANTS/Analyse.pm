@@ -8,13 +8,15 @@ use File::Copy;
 use Archive::Any;
 use Carp;
 use Module::CPANTS::Kwalitee;
+use IO::Capture::Stdout;
+use IO::Capture::Stderr;
 
 use vars qw($VERSION);
-$VERSION=0.52;
+$VERSION=0.60;
 
 use Module::Pluggable search_path=>['Module::CPANTS::Kwalitee'];
 
-__PACKAGE__->mk_accessors(qw(dist tarball distdir d mck));
+__PACKAGE__->mk_accessors(qw(dist tarball distdir d mck capture_stdout capture_stderr));
 __PACKAGE__->mk_accessors(qw(_testdir _dont_cleanup _tarball));
 
 
@@ -23,8 +25,14 @@ sub new {
     my $opts=shift || {};
     $opts->{d}={}; 
     my $me=bless $opts,$class;
-    
+
     $me->mck(Module::CPANTS::Kwalitee->new);
+    my $cserr=IO::Capture::Stderr->new;
+    my $csout=IO::Capture::Stdout->new;
+    $cserr->start;
+    $csout->start;
+    $me->capture_stderr($cserr);
+    $me->capture_stdout($csout);
     
     return $me; 
 }

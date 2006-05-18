@@ -21,4 +21,3 @@ is($d->{modules}[0]->{module},'AFS','module');
 is(ref($d->{prereq}),'ARRAY','prereq is ARRAY');
 is(ref($d->{uses}),'HASH','uses is HASH');
 
-

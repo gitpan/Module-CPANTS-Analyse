@@ -1,7 +1,13 @@
-#!/usr/bin/perl -w
+#!/usr/local/bin/perl -w
 use strict;
 
 use Module::CPANTS::Analyse;
+use Getopt::Std;
+use IO::Capture::Stdout;
+
+my %opts;
+getopts('d',\%opts);
+
 
 my $dist=shift(@ARGV);
 
@@ -13,31 +19,33 @@ $mca->unpack;
 $mca->analyse;
 $mca->calc_kwalitee;
 
+
 my @gen=$mca->mck->get_indicators;
 my $max_kw=@gen;
 
 my $kw=$mca->d->{kwalitee}{kwalitee};
 
-print "\n";
-print "Checked dist \t\t".$mca->tarball,"\n";
-print "Kwalitee rating\t\t".$kw."/$max_kw\n";
-
-if ($kw == $max_kw) {
-    print "\nCongratulations for building a 'perfect' distribution!\n";
+if ($opts{d}) {
+    use Data::Dumper;
+    print Dumper($mca->d);
 } else {
-    my $kwl=$mca->d->{kwalitee};
-    print "\nHere is a list of failed Kwalitee tests and\nwhat you can do to solve them:\n";
-    foreach my $ind (@{$mca->mck->get_indicators}) {
-        next if $kwl->{$ind->{name}};
-        print "* ".$ind->{name}."\n";
-        print $ind->{remedy}."\n\n";
-    
+
+    print "\n";
+    print "Checked dist \t\t".$mca->tarball,"\n";
+    print "Kwalitee rating\t\t".$kw."/$max_kw\n";
+
+    if ($kw == $max_kw) {
+        print "\nCongratulations for building a 'perfect' distribution!\n";
+    } else {
+        my $kwl=$mca->d->{kwalitee};
+        print "\nHere is a list of failed Kwalitee tests and\nwhat you can do to solve them:\n";
+        foreach my $ind (@{$mca->mck->get_indicators}) {
+            next if $kwl->{$ind->{name}};
+            print "* ".$ind->{name}."\n";
+            print $ind->{remedy}."\n\n";
+        }
     }
 }
-
-#use Data::Dumper;
-#print join("\n",sort keys %{$mca->d});
-
 __END__
 
 =head1 NAME

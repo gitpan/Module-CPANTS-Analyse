@@ -8,10 +8,11 @@ WriteMakefile
                            'Archive::Any' => '0.06',
                            'CPAN::DistnameInfo' => '0.06',
                            'Class::Accessor' => '0.19',
+                           'IO::Capture' => '0.05',
                            'Module::ExtractUse' => '0.17',
                            'Module::Pluggable' => '2.96',
                            'Pod::Simple::Checker' => '2.02',
-                           'YAML' => '0.39'
+                           'YAML' => '0.58'
                          },
           'INSTALLDIRS' => 'site',
           'EXE_FILES' => [
