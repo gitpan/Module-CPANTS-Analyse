@@ -3,6 +3,7 @@ Build.PL
 Changes
 lib/Module/CPANTS/Analyse.pm
 lib/Module/CPANTS/Kwalitee.pm
+lib/Module/CPANTS/Kwalitee/CpantsErrors.pm
 lib/Module/CPANTS/Kwalitee/Distname.pm
 lib/Module/CPANTS/Kwalitee/Files.pm
 lib/Module/CPANTS/Kwalitee/FindModules.pm
@@ -22,6 +23,7 @@ t/calc.t
 t/eg/Acme-DonMartin-0.06.tar.gz
 t/eg/AFS-2.4.0.tar.gz
 t/eg/not_extractable.gz
+t/kwalitee.t
 t/plugins.t
 t/testdir.t
 t/testfile.t

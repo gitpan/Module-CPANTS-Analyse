@@ -2,22 +2,22 @@
 use ExtUtils::MakeMaker;
 WriteMakefile
 (
-          'NAME' => 'Module::CPANTS::Analyse',
-          'VERSION_FROM' => 'lib/Module/CPANTS/Analyse.pm',
-          'PREREQ_PM' => {
-                           'Archive::Any' => '0.06',
-                           'CPAN::DistnameInfo' => '0.06',
-                           'Class::Accessor' => '0.19',
-                           'IO::Capture' => '0.05',
-                           'Module::ExtractUse' => '0.17',
-                           'Module::Pluggable' => '2.96',
-                           'Pod::Simple::Checker' => '2.02',
-                           'YAML' => '0.58'
-                         },
+          'PL_FILES' => {},
           'INSTALLDIRS' => 'site',
+          'NAME' => 'Module::CPANTS::Analyse',
           'EXE_FILES' => [
                            'bin/cpants_lint.pl'
                          ],
-          'PL_FILES' => {}
+          'VERSION_FROM' => 'lib/Module/CPANTS/Analyse.pm',
+          'PREREQ_PM' => {
+                           'Module::Pluggable' => '2.96',
+                           'YAML' => '0.58',
+                           'Pod::Simple::Checker' => '2.02',
+                           'Class::Accessor' => '0.19',
+                           'Archive::Any' => '0.06',
+                           'Module::ExtractUse' => '0.17',
+                           'CPAN::DistnameInfo' => '0.06',
+                           'IO::Capture' => '0.05'
+                         }
         )
 ;

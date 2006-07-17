@@ -12,7 +12,7 @@ use IO::Capture::Stdout;
 use IO::Capture::Stderr;
 
 use vars qw($VERSION);
-$VERSION=0.60;
+$VERSION=0.61;
 
 use Module::Pluggable search_path=>['Module::CPANTS::Kwalitee'];
 
@@ -44,14 +44,24 @@ sub unpack {
 
     copy($me->dist,$me->testfile);
     chdir($me->testdir); 
-
-    my $archive=Archive::Any->new($me->testfile);
-    eval {$archive->extract()};
-    return $@ if ($@);
-    
-    $me->d->{extractable}=1;
     $me->d->{size_packed}=-s $me->testfile;
     
+    my $archive;
+    eval {
+        $archive=Archive::Any->new($me->testfile);
+        $archive->extract();
+    };
+
+    if (my $error=$@) {
+        $me->capture_stdout->stop;
+        $me->capture_stderr->stop;
+        $me->d->{extractable}=0;
+        $me->d->{cpants_errors}=$error;
+        $me->d->{kwalitee}{extractable}=0;
+        return $error;
+    }
+    
+    $me->d->{extractable}=1;
     unlink($me->testfile);
    
     opendir(my $fh_testdir,$me->testdir) || die "Cannot open ".$me->testdir.": $!";
@@ -63,8 +73,8 @@ sub unpack {
         $me->d->{extracts_nicely}=1 if $di->distvname eq $stuff[0];
         
     } else {
-        return "SUCKER! ".$me->dist."\n";
-        #$dist->testdir($testdir);
+        $me->distdir(catdir($me->testdir));
+        $me->d->{extracts_nicely}=0;
     }
     return;
 }

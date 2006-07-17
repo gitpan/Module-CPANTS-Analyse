@@ -79,6 +79,7 @@ sub kwalitee_indicators{
             code=>sub {
                 return 0;               
             },
+            is_extra=>1,
         },
     ];
 }

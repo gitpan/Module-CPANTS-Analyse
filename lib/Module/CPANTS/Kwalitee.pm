@@ -5,7 +5,7 @@ use base qw(Class::Accessor);
 use Module::Pluggable search_path=>['Module::CPANTS::Kwalitee'];
 use Carp;
 
-__PACKAGE__->mk_accessors(qw(generators));
+__PACKAGE__->mk_accessors(qw(generators _gencache _genhashcache _available _total));
 
 sub new {
     my $class=shift;
@@ -27,31 +27,59 @@ sub new {
 sub get_indicators {
     my $self=shift;
     
-    my @indicators;
-    foreach my $gen (@{$self->generators}) {
-        foreach my $ind (@{$gen->kwalitee_indicators}) {
-            $ind->{defined_in}=$gen;
-            push(@indicators,$ind); 
+    my $indicators;
+    if ($self->_gencache) {
+        $indicators=$self->_gencache;
+    } else {
+        foreach my $gen (@{$self->generators}) {
+            foreach my $ind (@{$gen->kwalitee_indicators}) {
+                $ind->{defined_in}=$gen;
+                push(@$indicators,$ind); 
+            }
         }
+        $self->_gencache($indicators);
     }
-    return wantarray ? @indicators : \@indicators;
+    return wantarray ? @$indicators : $indicators;
 }
 
 sub get_indicators_hash {
     my $self=shift;
 
-    my %indicators;
-    foreach my $gen (@{$self->generators}) {
-        foreach my $ind (@{$gen->kwalitee_indicators}) {
-            $ind->{defined_in}=$gen;
-            $indicators{$ind->{name}}=$ind;
+    my $indicators;
+    if ($self->_genhashcache) {
+        $indicators=$self->_genhashcache;
+    } else {
+        foreach my $gen (@{$self->generators}) {
+            foreach my $ind (@{$gen->kwalitee_indicators}) {
+                $ind->{defined_in}=$gen;
+                $indicators->{$ind->{name}}=$ind;
+            }
         }
+        $self->_genhashcache($indicators);
     }
-    return \%indicators;
+    return $indicators;
 }
 
 sub available_kwalitee {
-    return scalar @{shift->get_indicators};
+    my $self=shift;
+
+    my $mem=$self->_available;
+    return $mem if $mem;
+
+    my $available;
+    foreach my $g ($self->get_indicators) {
+        $available++ unless $g->{is_extra};
+    }
+    $self->_available($available);
+}
+
+sub total_kwalitee {
+    my $self=shift;
+
+    my $mem=$self->_total;
+    return $mem if $mem;
+    
+    $self->_total(scalar @{$self->get_indicators});
 }
 
 
@@ -88,6 +116,14 @@ Get the list of all Kwalitee indicators, either as an ARRAY or ARRAYREF.
 =head3 get_indicators_hash
 
 Get the list of all Kwalitee indicators as an HASHREF.
+
+=head3 available_kwalitee
+
+Get the number of available kwalitee points
+
+=head3 total_kwalitee
+
+Get the total number of kwalitee points. This is bigger the available_kwalitee as some kwalitee metrics are marked as 'extra' (eg is_prereq).
 
 =head1 SEE ALSO
 
