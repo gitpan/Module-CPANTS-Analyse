@@ -15,7 +15,7 @@ WriteMakefile
                            'Pod::Simple::Checker' => '2.02',
                            'Class::Accessor' => '0.19',
                            'Archive::Any' => '0.06',
-                           'Module::ExtractUse' => '0.17',
+                           'Module::ExtractUse' => '0.18',
                            'CPAN::DistnameInfo' => '0.06',
                            'IO::Capture' => '0.05'
                          }

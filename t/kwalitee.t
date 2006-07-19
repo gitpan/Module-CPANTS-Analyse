@@ -5,7 +5,7 @@ use Module::CPANTS::Kwalitee;
 
 my $k=Module::CPANTS::Kwalitee->new({});
 
-is($k->available_kwalitee,17,'available kwalitee');
-is($k->total_kwalitee,18,'total kwalitee');
+is($k->available_kwalitee,18,'available kwalitee');
+is($k->total_kwalitee,19,'total kwalitee');
 
 

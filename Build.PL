@@ -10,7 +10,7 @@ my $build = Module::Build->new(
         'CPAN::DistnameInfo'=>'0.06',
         'Pod::Simple::Checker'=>'2.02',
         'YAML'=>'0.58',
-        'Module::ExtractUse'=>'0.17',
+        'Module::ExtractUse'=>'0.18',
         'Module::Pluggable'=>'2.96',
         'IO::Capture'=>'0.05',
     },

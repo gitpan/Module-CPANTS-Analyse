@@ -83,6 +83,18 @@ sub total_kwalitee {
 }
 
 
+sub all_indicator_names {
+    my $self=shift;
+    my @all=map { $_->{name} } $self->get_indicators;
+    return wantarray ? @all : \@all;
+}
+
+sub core_indicator_names {
+    my $self=shift;
+    my @all=map { $_->{name} } grep { !$_->{is_extra} } $self->get_indicators;
+    return wantarray ? @all : \@all;
+}
+
 q{Favourite record of the moment:
   Jahcoozi: Pure Breed Mongrel};
 
@@ -116,6 +128,14 @@ Get the list of all Kwalitee indicators, either as an ARRAY or ARRAYREF.
 =head3 get_indicators_hash
 
 Get the list of all Kwalitee indicators as an HASHREF.
+
+=head3 core_indicator_names
+
+Get a list of core indicator names (NOT the whole indicator HASHREF).
+
+=head3 all_indicator_names
+
+Get a list of all indicator names (NOT the whole indicator HASHREF).
 
 =head3 available_kwalitee
 

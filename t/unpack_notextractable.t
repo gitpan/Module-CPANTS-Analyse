@@ -11,5 +11,5 @@ my $a=Module::CPANTS::Analyse->new({
 my $rv=$a->unpack;
 
 like($rv,qr/Can.t call method .extract./,'unpack failed');
-is($a->d->{extractable},undef,'extractable');
+is($a->d->{extractable},0,'extractable');
 

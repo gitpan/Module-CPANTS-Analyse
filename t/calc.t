@@ -25,7 +25,7 @@ is($kw->{has_test_pod_coverage},1,'has_test_pod_coverage');
 is($kw->{use_strict},1,'use_strict');
 is($kw->{no_cpants_errors},1,'no_cpants_errors');
 
-is($kw->{kwalitee},17,'some kwalitee points');
+is($kw->{kwalitee},18,'some kwalitee points');
 
 #use Data::Dumper;
 #diag(Dumper $kw);

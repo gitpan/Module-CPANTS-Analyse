@@ -3,6 +3,7 @@ Build.PL
 Changes
 lib/Module/CPANTS/Analyse.pm
 lib/Module/CPANTS/Kwalitee.pm
+lib/Module/CPANTS/Kwalitee/BrokenInstaller.pm
 lib/Module/CPANTS/Kwalitee/CpantsErrors.pm
 lib/Module/CPANTS/Kwalitee/Distname.pm
 lib/Module/CPANTS/Kwalitee/Files.pm
