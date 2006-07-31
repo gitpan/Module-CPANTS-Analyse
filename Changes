@@ -1,10 +1,16 @@
 #-----------------------------------------------------------------
 # Changes for Module::CPANTS::Analyse
-# $Rev: 4184 $
-# $Date: 2006-07-19T21:01:30.111016Z $ 
+# $Rev: 4213 $
+# $Date: 2006-07-31T09:43:40.020119Z $ 
 #-----------------------------------------------------------------
 
 
+0.63    2006-07-31
+   - we now also find README.txt
+     resolves RT #20633 reported by MBARBON (thanks for the patch!)
+
+
+0.62    2006-07-20
   - added MCK::BrokenInstaller,
     submitted by Steffen Müller smueller@cpan.org
 

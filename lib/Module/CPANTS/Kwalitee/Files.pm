@@ -59,7 +59,7 @@ sub analyse {
 
     # find special files
     my %reqfiles;
-    my @special_files=(qw(Makefile.PL Build.PL README META.yml SIGNATURE MANIFEST NINJA test.pl));
+    my @special_files=(qw(Makefile.PL Build.PL META.yml SIGNATURE MANIFEST NINJA test.pl));
     foreach my $file (@special_files){
         (my $db_file=$file)=~s/\./_/g;
         $db_file="file_".lc($db_file);
@@ -69,6 +69,7 @@ sub analyse {
     # find more complex files
     my %regexs=(
         file_changelog=>qr{^chang(es?|log)|history}i,
+        file_readme=>qr{^readme(?:\.txt)?}i,
     );
     while (my ($name,$regex)=each %regexs) {
         $me->d->{$name}=join(',',grep {$_=~/$regex/} @files);
