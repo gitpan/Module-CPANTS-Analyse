@@ -1,6 +1,6 @@
 ---
 name: Module-CPANTS-Analyse
-version: 0.63
+version: 0.64
 author:
   - 'Thomas Klausner, <domm@cpan.org>, http://domm.zsi.at'
   - |-
@@ -22,7 +22,7 @@ requires:
 provides:
   Module::CPANTS::Analyse:
     file: lib/Module/CPANTS/Analyse.pm
-    version: 0.63
+    version: 0.64
   Module::CPANTS::Kwalitee:
     file: lib/Module/CPANTS/Kwalitee.pm
   Module::CPANTS::Kwalitee::BrokenInstaller:
@@ -41,7 +41,7 @@ provides:
     file: lib/Module/CPANTS/Kwalitee/Prereq.pm
   Module::CPANTS::Kwalitee::Uses:
     file: lib/Module/CPANTS/Kwalitee/Uses.pm
-generated_by: Module::Build version 0.2801
+generated_by: Module::Build version 0.2805
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.2.html
   version: 1.2

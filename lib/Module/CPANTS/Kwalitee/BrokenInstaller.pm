@@ -12,8 +12,10 @@ sub analyse {
     my $me = shift;
     my $distdir = $me->distdir;
     
-    my $mi = catfile(catdir($distdir, 'inc', 'Module'), 'Install.pm');
+    # inc/Module/Install.pm file
+    my $mi = catfile($distdir, 'inc', 'Module', 'Install.pm');
     
+    # Must be okay if not using Module::Install
     if (not -f $mi) {
         $me->d->{broken_module_install} = 0;
         return;
@@ -23,11 +25,28 @@ sub analyse {
       or die "Could not open file '$mi' for checking the bad_installer metric: $!";
     my $buf;
     read $ih, $buf, 100000 or die $!;
+    close $ih;
     if ($buf =~ /VERSION\s*=\s*("|'|)(\d+|\d*\.\d+(?:_\d+)?)\1/m) {
         my $version = $2;
         my $non_devel = $version;
         $non_devel =~ s/_\d+$//;
         if ($non_devel < 0.61) {
+            $me->d->{broken_module_install} = $version;
+        }
+        elsif ($non_devel < 0.64) {
+            $me->d->{broken_module_install} = 0;
+            
+            my $makefilepl = catfile($distdir, 'Makefile.PL');
+            return if not -f $makefilepl;
+            
+            open my $ih, '<', $makefilepl
+              or die "Could not open file '$makefilepl' for checking the bad_installer metric: $!";
+            local $/ = undef;
+            my $mftext = <$ih>;
+            close $ih;
+            
+            return if not defined $mftext or $mftext !~ /auto_install/;
+            
             $me->d->{broken_module_install} = $version;
         }
         else {
@@ -38,6 +57,7 @@ sub analyse {
         # Unknown version (parsing $VERSION failed)
         $me->d->{broken_module_install} = 1;
     }
+
     
     return;
 }
@@ -47,7 +67,7 @@ sub kwalitee_indicators {
   return [
     {
         name=>'has_working_buildtool',
-        error=>q{This package uses an obsolete version of Module::Install. Versions of Module::Install prior to 0.61 might not work on some systems at all.},
+        error=>q{This package uses an obsolete version of Module::Install. Versions of Module::Install prior to 0.61 might not work on some systems at all. Additionally if your Makefile.PL uses the 'auto_install()' feature, you need at least version 0.64.},
         remedy=>q{Upgrade the bundled version of Module::Install to at least 0.61, but preferably to the most current release. Alternatively, you can switch to another build system / installer that does not suffer from this problem. (ExtUtils::MakeMaker, Module::Build both of which have their own set of problems.)},
         code=>sub { 
             shift->{broken_module_install} ? 0 : 1 },
@@ -85,6 +105,9 @@ used by any other tests.
 
 C<MCK::BrokenInstaller> checks whether the distribution uses Module::Install
 and if so whether it uses a reasonably current version of it (0.61 or later).
+
+It also checks whether the F<Makefile.PL> uses the C<auto_install> feature.
+If so, C<Module::Install> should be at least version 0.64.
 
 =head3 kwalitee_indicators
 
