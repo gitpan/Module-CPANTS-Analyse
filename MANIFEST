@@ -8,6 +8,7 @@ lib/Module/CPANTS/Kwalitee/CpantsErrors.pm
 lib/Module/CPANTS/Kwalitee/Distname.pm
 lib/Module/CPANTS/Kwalitee/Files.pm
 lib/Module/CPANTS/Kwalitee/FindModules.pm
+lib/Module/CPANTS/Kwalitee/Manifest.pm
 lib/Module/CPANTS/Kwalitee/Pod.pm
 lib/Module/CPANTS/Kwalitee/Prereq.pm
 lib/Module/CPANTS/Kwalitee/Uses.pm

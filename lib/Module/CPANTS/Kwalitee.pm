@@ -82,7 +82,6 @@ sub total_kwalitee {
     $self->_total(scalar @{$self->get_indicators});
 }
 
-
 sub all_indicator_names {
     my $self=shift;
     my @all=map { $_->{name} } $self->get_indicators;

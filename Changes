@@ -1,8 +1,15 @@
 #-----------------------------------------------------------------
 # Changes for Module::CPANTS::Analyse
-# $Rev: 1442 $
-# $Date: 2006-08-29T06:00:24.284223Z $ 
+# $Rev: 1463 $
+# $Date: 2006-09-02T14:22:24.207661Z $ 
 #-----------------------------------------------------------------
+
+0.65    2006-09-05   (YAPC::Europe hackathon release)
+   - updated test suite
+   - added has_example to MCK::Files
+   - added buildtool_not_executable to MCK::Files
+   - added MCK::Manifest (manifest_matches_dist)
+
 
 0.64	2006-08-29
    - updated MCK::BrokenInstaller

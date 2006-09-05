@@ -94,7 +94,16 @@ sub analyse {
     }
     #$me->d->{released_epoch}=$mtime;
     $me->d->{released}=scalar localtime($mtime);
-    
+   
+    # Check permissions of Build.PL/Makefile.PL
+    {
+        my $build_exe=0;
+
+        $build_exe=1 if ($me->d->{file_makefile_pl} && -x catfile($me->distdir,'Makefile.PL'));
+        $build_exe=1 if ($me->d->{file_build_pl} && -x catfile($me->distdir,'Build.PL'));
+        $build_exe=1 unless ($me->d->{file_makefile_pl} && $me->d->{file_build_pl});
+        $me->d->{buildfile_executable}=$build_exe;
+    }
     return;
 }
 
@@ -179,7 +188,25 @@ sub kwalitee_indicators {
             return 0;
         },
     },
-
+    {
+        name=>'buildtool_no_executable',
+        error=>q{The buildtool (Build.PL/Makefile.PL) is executable. This is bad, because you should specifiy which perl you want to use while installing.},
+        remedy=>q{Change the permissions of Build.PL/Makefile.PL to not-executable.},
+        code=>sub {shift->{buildfile_executable} ? 0 : 1},
+    },
+    {
+        name=>'has_example',
+        is_extra=>1,
+        error=>'This distribution does not include examples.',
+        remedy=>q{Add a directory named 'ex','eg' or 'examples' to your distribution that includes some scripts showing one or more use-cases of the distribution.},
+        code=>sub {
+            my $d=shift;
+            return 0 unless (my @eg_dir)=grep {/^(ex|eg|examples?)$/} @{ $d->{dirs_array} };
+            my $eg_dirs=join('|',@eg_dir);
+            my $rx_egfile=qr|$eg_dirs/.*\.pl$|;
+            return 1 if grep {/$rx_egfile/} @{ $d->{files_array} };
+        },
+    },
 
 # this might not be a good metric - at least according to feedback
 #    {
@@ -249,6 +276,10 @@ Returns the Kwalitee Indicators datastructure.
 =item * no_symlinks
 
 =item * has_tests
+
+=item * buildfile_not_executabel
+
+=item * has_example (optional)
 
 =back
 

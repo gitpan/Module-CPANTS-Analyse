@@ -12,7 +12,7 @@ use IO::Capture::Stdout;
 use IO::Capture::Stderr;
 
 use vars qw($VERSION);
-$VERSION=0.64;
+$VERSION=0.65;
 
 use Module::Pluggable search_path=>['Module::CPANTS::Kwalitee'];
 
