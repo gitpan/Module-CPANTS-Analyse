@@ -1,4 +1,4 @@
-use Test::More tests => 8;
+use Test::More tests => 10;
 use Test::Deep;
 
 use Module::CPANTS::Kwalitee;
@@ -25,5 +25,12 @@ is(ref($ind->{use_strict}),'HASH','hash element');
     is(@all,20,'number of indicators');
     my $all=$k->core_indicator_names;
     is(@$all,20,'number of indicators');
+}
+
+{
+    my @all=$k->optional_indicator_names;
+    is(@all,2,'number of indicators');
+    my $all=$k->optional_indicator_names;
+    is(@$all,2,'number of indicators');
 }
 

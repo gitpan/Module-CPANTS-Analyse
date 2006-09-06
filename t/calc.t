@@ -1,4 +1,4 @@
-use Test::More tests => 13;
+use Test::More tests => 14;
 
 use Module::CPANTS::Analyse;
 use File::Spec::Functions;
@@ -24,9 +24,10 @@ is($kw->{has_test_pod},1,'has_test_pod');
 is($kw->{has_test_pod_coverage},1,'has_test_pod_coverage');
 is($kw->{use_strict},1,'use_strict');
 is($kw->{has_example},1,'has_example');
+is($kw->{buildtool_not_executable},1,'buildtool_not_executable');
 is($kw->{no_cpants_errors},1,'no_cpants_errors');
 
-is($kw->{kwalitee},20,'some kwalitee points');
+is($kw->{kwalitee},21,'some kwalitee points');
 
 #use Data::Dumper;
 #diag(Dumper $kw);

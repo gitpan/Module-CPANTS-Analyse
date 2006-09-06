@@ -100,8 +100,8 @@ sub analyse {
         my $build_exe=0;
 
         $build_exe=1 if ($me->d->{file_makefile_pl} && -x catfile($me->distdir,'Makefile.PL'));
-        $build_exe=1 if ($me->d->{file_build_pl} && -x catfile($me->distdir,'Build.PL'));
-        $build_exe=1 unless ($me->d->{file_makefile_pl} && $me->d->{file_build_pl});
+        $build_exe=2 if ($me->d->{file_build_pl} && -x catfile($me->distdir,'Build.PL'));
+        $build_exe=3 unless ($me->d->{file_makefile_pl} || $me->d->{file_build_pl});
         $me->d->{buildfile_executable}=$build_exe;
     }
     return;
@@ -189,7 +189,7 @@ sub kwalitee_indicators {
         },
     },
     {
-        name=>'buildtool_no_executable',
+        name=>'buildtool_not_executable',
         error=>q{The buildtool (Build.PL/Makefile.PL) is executable. This is bad, because you should specifiy which perl you want to use while installing.},
         remedy=>q{Change the permissions of Build.PL/Makefile.PL to not-executable.},
         code=>sub {shift->{buildfile_executable} ? 0 : 1},

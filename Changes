@@ -1,29 +1,34 @@
 #-----------------------------------------------------------------
 # Changes for Module::CPANTS::Analyse
-# $Rev: 1463 $
-# $Date: 2006-09-02T14:22:24.207661Z $ 
+# $Rev: 1473 $
+# $Date: 2006-09-05T10:13:30.416432Z $ 
 #-----------------------------------------------------------------
 
+
+0.66    2006-09-06
+    - added optional_indicator_names utility method
+
+
 0.65    2006-09-05   (YAPC::Europe hackathon release)
-   - updated test suite
-   - added has_example to MCK::Files
-   - added buildtool_not_executable to MCK::Files
-   - added MCK::Manifest (manifest_matches_dist)
+    - updated test suite
+    - added has_example to MCK::Files
+    - added buildtool_not_executable to MCK::Files
+    - added MCK::Manifest (manifest_matches_dist)
 
 
 0.64	2006-08-29
-   - updated MCK::BrokenInstaller
-     submitted by Steffen Müller smueller@cpan.org
+    - updated MCK::BrokenInstaller
+      submitted by Steffen Müller smueller@cpan.org
 
 
 0.63    2006-07-31
-   - we now also find README.txt
-     resolves RT #20633 reported by MBARBON (thanks for the patch!)
+    - we now also find README.txt
+      resolves RT #20633 reported by MBARBON (thanks for the patch!)
 
 
 0.62    2006-07-20
-  - added MCK::BrokenInstaller,
-    submitted by Steffen Müller smueller@cpan.org
+   - added MCK::BrokenInstaller,
+     submitted by Steffen Müller smueller@cpan.org
 
 
 0.61    2006-07-17
