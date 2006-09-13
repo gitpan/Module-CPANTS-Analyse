@@ -13,6 +13,7 @@ sub new {
     
     my %generators;
     foreach my $gen ($me->plugins) {
+        ## no critic (ProhibitStringyEval)
         eval "require $gen";
         croak qq{cannot load $gen: $@} if $@;
         $generators{$gen}=$gen->order;        

@@ -10,9 +10,10 @@ use Carp;
 use Module::CPANTS::Kwalitee;
 use IO::Capture::Stdout;
 use IO::Capture::Stderr;
+use YAML qw(LoadFile);
 
 use vars qw($VERSION);
-$VERSION=0.66;
+$VERSION=0.67;
 
 use Module::Pluggable search_path=>['Module::CPANTS::Kwalitee'];
 
@@ -36,7 +37,6 @@ sub new {
     
     return $me; 
 }
-
 
 sub unpack {
     my $me=shift;
@@ -130,6 +130,20 @@ sub tarball {
     return $me->_tarball($tb);
 }
 
+sub read_meta_yml {
+    my $me=shift;
+    if (not $me->{meta_yml}) {
+        my $files=$me->d->{files_array};
+        my $distdir=$me->distdir;
+        if (grep {/^META\.yml$/} @$files) {
+            eval {
+                $me->{meta_yml}=LoadFile(catfile($distdir,'META.yml'));
+            };
+        }
+    }
+    return $me->{meta_yml};
+}
+
 
 q{Favourite record of the moment:
   Jahcoozi: Pure Breed Mongrel};
@@ -191,6 +205,10 @@ Returns the location of the unextracted tarball.
 =head3 tarball
 
 Returns the filename of the tarball.
+
+=head3 read_meta_yml
+
+Reads the META.yml file and returns its content.
 
 =head1 WEBSITE
 

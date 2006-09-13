@@ -7,6 +7,7 @@ my $build = Module::Build->new(
     requires    => {
         'Class::Accessor'=>'0.19',
         'Archive::Any'=>'0.06',
+        'Archive::Tar'=>'1.30',
         'CPAN::DistnameInfo'=>'0.06',
         'Pod::Simple::Checker'=>'2.02',
         'YAML'=>'0.58',

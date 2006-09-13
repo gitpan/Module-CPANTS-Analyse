@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------
 # TODO Module-CPANTS-Analyse
-# $Rev: 1467 $
-# $Date: 2006-09-02T16:46:27.250080Z $ 
+# $Rev: 4295 $
+# $Date: 2006-09-12T18:57:45.366262Z $ 
 #-----------------------------------------------------------------
 
 
@@ -9,11 +9,17 @@
 # BUGS
 #-----------------------------------------------------------------
 
+Robert 'phaylon' Sedlacek <phaylon@dunkelheit.at>
+  2. Bei einer $VERSION = '0.01_02'; bekomme ich von cpants_lint.pl die           
+  Meldung, dass 'has_proper_version' nicht bestanden wird.     
+
+http://rt.cpan.org/Ticket/Display.html?id=21370
+  Win32 test fail:  analyse.t, analyse_afs.t, calc.t, testfile.t
+
 #-----------------------------------------------------------------
 # New Metrics
 #-----------------------------------------------------------------
 
-- has_license
 - no_boilerplate
 - has_valid_filenames
 - declares_dependencies

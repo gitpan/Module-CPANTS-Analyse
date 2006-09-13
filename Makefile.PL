@@ -17,6 +17,7 @@ WriteMakefile
                            'Archive::Any' => '0.06',
                            'Module::ExtractUse' => '0.18',
                            'CPAN::DistnameInfo' => '0.06',
+                           'Archive::Tar' => '1.30',
                            'IO::Capture' => '0.05'
                          }
         )

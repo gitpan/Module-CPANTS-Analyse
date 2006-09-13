@@ -1,4 +1,4 @@
-use Test::More tests => 10;
+use Test::More tests => 11;
 
 use Module::CPANTS::Analyse;
 use File::Spec::Functions;
@@ -23,6 +23,7 @@ is($d->{prereq}[0]->{requires},'Compress::Zlib','prereq');
 is(ref($d->{uses}),'HASH','uses is HASH');
 is($d->{uses}{'Compress::Zlib'}{module},'Compress::Zlib','uses');
 is($d->{uses}{'Test::More'}{in_tests},1,'uses');
+ok(!defined($d->{license}),'no license in META.yml');
 
 #use Data::Dumper;
 #diag(Dumper $d);

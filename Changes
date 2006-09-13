@@ -1,8 +1,18 @@
 #-----------------------------------------------------------------
 # Changes for Module::CPANTS::Analyse
-# $Rev: 1473 $
-# $Date: 2006-09-05T10:13:30.416432Z $ 
+# $Rev: 4295 $
+# $Date: 2006-09-12T18:57:45.366262Z $ 
 #-----------------------------------------------------------------
+
+0.67    2006-09-13
+    - cpants_lint.pl now handles reporting of optional metrics
+      better.
+    - added t/99_critic.t (Gabor Szabo)
+    - some code cleanups as reported by Test::Perl::Critic
+      (Gabor Szabo)
+    - new metric: has_license; MCK::MetaYML (Gabor Szabo)
+    - MCK::Pod now reports the error messages returned by
+      Pod::Simple::Checker (suggested by Gabor Szabo)
 
 
 0.66    2006-09-06

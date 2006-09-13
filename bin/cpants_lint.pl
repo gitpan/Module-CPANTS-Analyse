@@ -27,27 +27,55 @@ if ($cannot_unpack) {
 $mca->analyse;
 $mca->calc_kwalitee;
 
-my $max_kw=$mca->mck->available_kwalitee;
-my $kw=$mca->d->{kwalitee}{kwalitee};
 
 if ($opts{d}) {
+    $Data::Dumper::Sortkeys=1;
     print Dumper($mca->d);
 } else {
 
+    # build up lists of failed metrics
+    my (@core_failure,@opt_failure);
+    my ($core_kw,$opt_kw)=(0,0);
+    my $kwl=$mca->d->{kwalitee};
+        
+    foreach my $ind (@{$mca->mck->get_indicators}) {
+        if ($ind->{is_extra}) {
+            next if $ind->{name} eq 'is_prereq';
+            if ($kwl->{$ind->{name}}) {
+                $opt_kw++;
+            } else {
+                push(@opt_failure,"* ".$ind->{name}."\n".$ind->{remedy});
+            }
+        } else {
+            if ($kwl->{$ind->{name}}) {
+                $core_kw++;
+            } else {
+                push(@core_failure,"* ".$ind->{name}."\n".$ind->{remedy});
+            }
+        }
+    }
+
+    # output results 
     print "\n";
     print "Checked dist \t\t".$mca->tarball,"\n";
-    print "Kwalitee rating\t\t".sprintf("%.2f",100*$kw/$max_kw)."% ($kw/$max_kw)\n";
 
-    if ($kw == $max_kw) {
+    my $max_core_kw=$mca->mck->available_kwalitee;
+    my $max_kw=$mca->mck->total_kwalitee;
+    my $total_kw=$core_kw+$opt_kw;
+
+    print "Kwalitee rating\t\t".sprintf("%.2f",100*$total_kw/$max_core_kw)."% ($total_kw/$max_core_kw)\n";
+
+
+    if ($total_kw == $max_kw -1) {  # -1 because of is_prereq
         print "\nCongratulations for building a 'perfect' distribution!\n";
     } else {
-        my $kwl=$mca->d->{kwalitee};
-        print "\nHere is a list of failed Kwalitee tests and\nwhat you can do to solve them:\n\n";
-        foreach my $ind (@{$mca->mck->get_indicators}) {
-            next if $ind->{is_extra};
-            next if $kwl->{$ind->{name}};
-            print "* ".$ind->{name}."\n";
-            print $ind->{remedy}."\n\n";
+        if (@core_failure) {
+            print "\nHere is a list of failed Kwalitee tests and\nwhat you can do to solve them:\n\n";
+            print join ("\n\n",@core_failure,'');
+        }
+        if (@opt_failure) {
+            print "\nFailed optional Kwalitee tests and\nwhat you can do to solve them:\n\n";
+            print join ("\n\n",@opt_failure,'');
         }
     }
 }

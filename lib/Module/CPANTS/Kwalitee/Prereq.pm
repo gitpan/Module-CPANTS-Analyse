@@ -2,7 +2,6 @@ package Module::CPANTS::Kwalitee::Prereq;
 use warnings;
 use strict;
 use File::Spec::Functions qw(catfile);
-use YAML qw(LoadFile);
 
 sub order { 100 }
 
@@ -18,31 +17,27 @@ sub analyse {
     my $distdir=$me->distdir;
 
     my $prereq;
-    if (grep {/^META\.yml$/} @$files) {
-        my $yaml;
-        eval {
-            $yaml=LoadFile(catfile($distdir,'META.yml'));
-        };
-
-        if ($yaml) {
-            if ($yaml->{requires}) {
-                $prereq=$yaml->{requires};
-            }
+    my $yaml=$me->read_meta_yml;
+    if ($yaml) {
+        if ($yaml->{requires}) {
+            $prereq=$yaml->{requires};
         }
     } elsif (grep {/^Build\.PL$/} @$files) {
-        open(IN,catfile($distdir,'Build.PL')) || return 1;
-        my $m=join '', <IN>;
-        close IN;
+        open(my $in, '<', catfile($distdir,'Build.PL')) || return 1;
+        my $m=join '', <$in>;
+        close $in;
         my($requires) = $m =~ /requires.*?=>.*?\{(.*?)\}/s;
+        ## no critic (ProhibitStringyEval)
         eval "{ no strict; \$prereq = { $requires \n} }";
         
     } else {
-        open(IN,catfile($distdir,'Makefile.PL')) || return 1;
-        my $m=join '', <IN>;
-        close IN;
+        open(my $in, '<', catfile($distdir,'Makefile.PL')) || return 1;
+        my $m=join '', <$in>;
+        close $in;
 
         my($requires) = $m =~ /PREREQ_PM.*?=>.*?\{(.*?)\}/s;
         $requires||='';
+        ## no critic (ProhibitStringyEval)
         eval "{ no strict; \$prereq = { $requires \n} }";
     }
     return unless $prereq;

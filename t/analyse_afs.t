@@ -1,4 +1,4 @@
-use Test::More tests => 7;
+use Test::More tests => 8;
 
 use Module::CPANTS::Analyse;
 use File::Spec::Functions;
@@ -20,4 +20,5 @@ is(ref($d->{modules}),'ARRAY','modules is ARRAY');
 is($d->{modules}[0]->{module},'AFS','module');
 is(ref($d->{prereq}),'ARRAY','prereq is ARRAY');
 is(ref($d->{uses}),'HASH','uses is HASH');
+is($d->{license},'perl','has perl license');
 

@@ -19,6 +19,7 @@ sub analyse {
     my $distdir=$me->distdir;
 
     my $pod_errors=0;
+    my @msgs;
     foreach my $file (@$files) {
         next unless $file=~/\.p(m|od|l)$/;
 
@@ -30,9 +31,11 @@ sub analyse {
             $parser->parse_file(catfile($distdir,$file));
             my $errors=()=$errata=~/Around line /g;
             $pod_errors+=$errors;
+            push(@msgs,$errata);
         }
     }
     $me->d->{pod_errors}=$pod_errors;
+    $me->d->{pod_errors_msg}=join("\n",@msgs);
 }
 
 
@@ -44,7 +47,7 @@ sub kwalitee_indicators {
     return [
         {
             name=>'no_pod_errors',
-            error=>q{The documentation for this distribution contains syntactic errors in its POD.},
+            error=>q{The documentation for this distribution contains syntactic errors in its POD. Note that this metric tests all .pl, .pm and .pod files, even if they are in t/.},
             remedy=>q{Remove the POD errors. You can check for POD errors automatically by including Test::Pod to your test suite.},
             code=>sub { shift->{pod_errors} ? 0 : 1 },
         },
