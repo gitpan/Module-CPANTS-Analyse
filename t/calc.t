@@ -27,7 +27,7 @@ is($kw->{has_example},1,'has_example');
 is($kw->{buildtool_not_executable},1,'buildtool_not_executable');
 is($kw->{no_cpants_errors},1,'no_cpants_errors');
 
-is($kw->{kwalitee},21,'some kwalitee points');
+is($kw->{kwalitee},22,'some kwalitee points');
 
 #use Data::Dumper;
 #diag(Dumper $kw);

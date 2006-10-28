@@ -13,7 +13,7 @@ use IO::Capture::Stderr;
 use YAML qw(LoadFile);
 
 use vars qw($VERSION);
-$VERSION=0.67;
+$VERSION=0.68;
 
 use Module::Pluggable search_path=>['Module::CPANTS::Kwalitee'];
 
@@ -34,7 +34,6 @@ sub new {
     $csout->start;
     $me->capture_stderr($cserr);
     $me->capture_stdout($csout);
-    
     return $me; 
 }
 
@@ -130,19 +129,6 @@ sub tarball {
     return $me->_tarball($tb);
 }
 
-sub read_meta_yml {
-    my $me=shift;
-    if (not $me->{meta_yml}) {
-        my $files=$me->d->{files_array};
-        my $distdir=$me->distdir;
-        if (grep {/^META\.yml$/} @$files) {
-            eval {
-                $me->{meta_yml}=LoadFile(catfile($distdir,'META.yml'));
-            };
-        }
-    }
-    return $me->{meta_yml};
-}
 
 
 q{Favourite record of the moment:

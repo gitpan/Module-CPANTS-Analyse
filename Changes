@@ -1,8 +1,25 @@
 #-----------------------------------------------------------------
 # Changes for Module::CPANTS::Analyse
-# $Rev: 4295 $
-# $Date: 2006-09-12T18:57:45.366262Z $ 
+# $Rev: 1627 $
+# $Date: 2006-10-28T16:24:02.112896Z $ 
 #-----------------------------------------------------------------
+
+
+0.68    2006-10-28
+    - fixed bug in MCK::FindModules reported by JDHEDDEN in RT #22081
+      (the module name of modules living in the top-level namespace (eg
+      'threads/pm') was not guessed correctly
+    - use META.yml 'provides' (if it exists) instead of guessing module names in
+      MCK::FindModules
+    - modifed changelog-regex in MCK::Files as suggested by CDOLAN in 
+      RT #21999
+    - added MCK::License
+    - moved license checking to MCK::License
+    - added checks for LICENSE file and LICENSE POD section
+    - moved meta_yml parsing to MCK::MetaYML
+    - changed has_license error text after Schwern (and Andreas Koenig) suggested
+      that MakeMaker now suppor ts a license field
+
 
 0.67    2006-09-13
     - cpants_lint.pl now handles reporting of optional metrics

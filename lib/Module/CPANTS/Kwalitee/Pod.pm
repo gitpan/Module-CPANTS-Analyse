@@ -31,7 +31,7 @@ sub analyse {
             $parser->parse_file(catfile($distdir,$file));
             my $errors=()=$errata=~/Around line /g;
             $pod_errors+=$errors;
-            push(@msgs,$errata);
+            push(@msgs,$errata) if $errata=~/\w/;
         }
     }
     $me->d->{pod_errors}=$pod_errors;

@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------
 # TODO Module-CPANTS-Analyse
-# $Rev: 4295 $
-# $Date: 2006-09-12T18:57:45.366262Z $ 
+# $Rev: 1615 $
+# $Date: 2006-10-26T15:52:08.269244Z $ 
 #-----------------------------------------------------------------
 
 
@@ -29,6 +29,14 @@ http://rt.cpan.org/Ticket/Display.html?id=21370
 - has_rating ?
 - relation of subs to lines of code ?
 
+- change has_license to has_license_in_yaml,
+  put the actual name of the license (perl, etc.) in the 
+  database for later retreival
+- has_license_in_source
+    Module::License::Report  integration
+    (though I am not sure if that should mean the main .pm
+        file only or all the files or what)
+- licenses_are_consistent
 
 #-----------------------------------------------------------------
 # Other Stuff 

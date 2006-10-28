@@ -17,7 +17,7 @@ sub analyse {
     my $distdir=$me->distdir;
 
     my $prereq;
-    my $yaml=$me->read_meta_yml;
+    my $yaml=$me->d->{meta_yml};
     if ($yaml) {
         if ($yaml->{requires}) {
             $prereq=$yaml->{requires};

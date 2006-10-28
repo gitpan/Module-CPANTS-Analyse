@@ -3,7 +3,7 @@ use warnings;
 use strict;
 use CPAN::DistnameInfo;
 
-sub order { 20 }
+sub order { 15 }
 
 ##################################################################
 # Analyse

@@ -14,15 +14,45 @@ sub analyse {
     my $files=$me->d->{files_array};
    
     # use provides (META.yml) if available
+    my $meta=$me->d->{meta_yml};
+    if (my $provides=$meta->{provides}) {
+        while (my ($module,$data)=each %$provides) {
+            my $where='unknown';
+            if ($data->{file} =~ m|lib/|) {
+                $where='lib';
+            }
+            elsif ($data->{file} !~ m|/|) {
+                $where='base';
+            }
+            
+            push(@{$me->d->{modules}},
+                {
+                    module=>$module,
+                    file=>$data->{file},
+                    in_basedir=>$where eq 'base' ? 1 : 0,
+                    in_lib=> $where eq 'lib' ? 1 : 0,
+                });
+        }
+        return;
+    }
     
     my @modules_basedir=grep {/^[^\/]+\.pm$/} @$files;
     if (@modules_basedir) {
         my $namespace=$me->d->{dist} || die 'unknown namespace '.Dumper($me);
-        $namespace=~s/-[^-]+$//;
-        $namespace=~s/-/::/g;
-
+        
+        # try to guess the namespace
+        if ($namespace=~/-/) {
+            # multi-level namespace
+            $namespace=~s/-[^-]+$/-/;    # remove last part of name
+            $namespace=~s/-/::/g;
+        }
+        
+        # single level namespace (e.g. 'threads')
+        else {
+            $namespace='';    
+        }
         foreach my $file (@modules_basedir) {
-            my $module=$namespace."::".$file;
+            my $module=$namespace.$file;
             $module=~s/\.pm$//;
             push(@{$me->d->{modules}},
                 {
