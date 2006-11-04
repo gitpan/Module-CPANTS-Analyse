@@ -1,8 +1,13 @@
 #-----------------------------------------------------------------
 # Changes for Module::CPANTS::Analyse
-# $Rev: 1627 $
-# $Date: 2006-10-28T16:24:02.112896Z $ 
+# $Rev: 4507 $
+# $Date: 2006-11-04T17:24:33.456399Z $ 
 #-----------------------------------------------------------------
+
+0.69    2006-11-04
+    - splited up metayml_conforms_spec to metayml_conforms_spec_1_0
+      and metayml_conforms_spec_1_2 (which is optional)
+    - added metayml_error and docu pointers to it.
 
 
 0.68    2006-10-28

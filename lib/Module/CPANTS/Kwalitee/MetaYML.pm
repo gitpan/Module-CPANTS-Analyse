@@ -35,7 +35,7 @@ sub kwalitee_indicators{
     return [
         {
             name=>'metayml_is_parsable',
-            error=>q{The META.yml file of this distributioncould not be parsed by the version of YAML.pm CPANTS is using.},
+            error=>q{The META.yml file of this distributioncould not be parsed by the version of YAML.pm CPANTS is using. See 'metayml_parse_error' in the dist view for more info.},
             remedy=>q{Upgrade your YAML.pm or convince the maintainer of CPANTS that he has to upgrade.},
             code=>sub { shift->{metayml_is_parsable} ? 1 : 0 }
         },
@@ -49,22 +49,40 @@ sub kwalitee_indicators{
                 ($yaml->{license} and $yaml->{license} ne 'unknown') ? 1 : 0 }
         },
         {
-            name=>'metayml_has_required_fields',
-            error=>q{Some required fields are missing in META.yml},
-            remedy=>q{Add the required fields to META.yml. Required fields are listed in the META.yml Spec at http://module-build.sourceforge.net/META-spec-current.html},
+            name=>'metayml_conforms_spec_1_0',
+            error=>q{META.yml does not conform the the META.yml Spec 1.0. See 'metayml_error' in the dist view for more info.},
+            remedy=>q{Take a look at the META.yml Spec at http://module-build.sourceforge.net/META-spec-current.html and change your META.yml accordingly},
             code=>sub {
                 my $d=shift;
-                my $yaml=$d->{meta_yml};
-                my $ok;
-                my @fields=qw(meta-spec name version abstract author license generated_by);
-                foreach my $field (@fields) {
-                    $ok++ if defined $yaml->{$field};
-                }
-                $ok == @fields ? 1 : 0;  
+                return check_spec_conformance($d,'1.0',[qw(name version license generated_by)]);
             },
         },
-
+        {
+            name=>'metayml_conforms_spec_1_2',
+            is_extra=>1,
+            error=>q{META.yml does not conform the the META.yml Spec 1.2. See 'metayml_error' in the dist view for more info.},
+            remedy=>q{Take a look at the META.yml Spec at http://module-build.sourceforge.net/META-spec-current.html and change your META.yml accordingly},
+            code=>sub {
+                my $d=shift;
+                return check_spec_conformance($d,'1.2',[qw(meta-spec name version abstract author license generated_by)]);
+            },
+        },
     ];
+}
+
+sub check_spec_conformance {
+    my ($d,$version,$fields)=@_;
+    my $yaml=$d->{meta_yml};
+    my %fields=map {$_=>1} @$fields;
+    foreach my $field (keys %fields) {
+        delete $fields{$field} if exists $yaml->{$field};
+    }
+    if (scalar keys %fields == 0) {
+        return 1;
+    } else {
+        $d->{meta_yml_error}.=join("",map {"'$_' missing (META.yml spec $version)\n"} keys %fields);
+        return 0;
+    }
 }
 
 
@@ -105,11 +123,19 @@ Returns the Kwalitee Indicators datastructure.
 
 =item * metayml_is_parsable
 
-=item * metayml_has_required_fields
-
 =item * metayml_has_license
 
+=item * metayml_conforms_spec_1_0
+
+=item * metayml_conforms_spec_1_2
+
 =back
+
+=head3 check_spec_conformance
+
+  check_spec_conformance($d,$version,$fields);
+
+Checks if META.yml contains the neccessary keys
 
 =head1 SEE ALSO
 
