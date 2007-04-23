@@ -14,6 +14,7 @@ my $build = Module::Build->new(
         'Module::ExtractUse'=>'0.18',
         'Module::Pluggable'=>'2.96',
         'IO::Capture'=>'0.05',
+        'Array::Diff'=>'0.04',
     },
     script_files=>[qw(bin/cpants_lint.pl)],
     create_makefile_pl=>'traditional',

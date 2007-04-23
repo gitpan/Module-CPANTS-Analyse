@@ -11,6 +11,9 @@ sub order { 1000 }
 sub analyse {
     my $class=shift;
     my $me=shift;
+
+    return if $me->opts->{no_capture};
+
     my $sout=$me->capture_stdout;
     my $serr=$me->capture_stderr;
     $sout->stop;
@@ -31,7 +34,7 @@ sub kwalitee_indicators {
     return [
         {
             name=>'no_cpants_errors',
-            error=>q{Some errors occured during CPANTS testing. They might be caused by bugs in CPANTS or some strange features of this distribution},
+            error=>q{Some errors occured during CPANTS testing. They might be caused by bugs in CPANTS or some strange features of this distribution. See 'cpants_errors' in the dist view for more info.},
             remedy=>q{Please report the error(s) to bug-module-cpants-analyse@rt.cpan.org},
             code=>sub { shift->{cpants_errors} ? 0 : 1 },
         },

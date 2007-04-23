@@ -11,6 +11,7 @@ WriteMakefile
           'VERSION_FROM' => 'lib/Module/CPANTS/Analyse.pm',
           'PREREQ_PM' => {
                            'Module::Pluggable' => '2.96',
+                           'Array::Diff' => '0.04',
                            'YAML' => '0.58',
                            'Pod::Simple::Checker' => '2.02',
                            'Class::Accessor' => '0.19',

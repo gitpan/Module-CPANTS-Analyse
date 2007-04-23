@@ -13,27 +13,31 @@ use IO::Capture::Stderr;
 use YAML qw(LoadFile);
 
 use vars qw($VERSION);
-$VERSION=0.69;
+$VERSION=0.71;
 
 use Module::Pluggable search_path=>['Module::CPANTS::Kwalitee'];
 
-__PACKAGE__->mk_accessors(qw(dist tarball distdir d mck capture_stdout capture_stderr));
+__PACKAGE__->mk_accessors(qw(dist opts tarball distdir d mck capture_stdout capture_stderr));
 __PACKAGE__->mk_accessors(qw(_testdir _dont_cleanup _tarball));
 
 
 sub new {
     my $class=shift;
     my $opts=shift || {};
-    $opts->{d}={}; 
+    $opts->{d}={};
+    $opts->{opts} ||= {};
     my $me=bless $opts,$class;
 
     $me->mck(Module::CPANTS::Kwalitee->new);
-    my $cserr=IO::Capture::Stderr->new;
-    my $csout=IO::Capture::Stdout->new;
-    $cserr->start;
-    $csout->start;
-    $me->capture_stderr($cserr);
-    $me->capture_stdout($csout);
+    
+    unless ($me->opts->{no_capture}) {
+        my $cserr=IO::Capture::Stderr->new;
+        my $csout=IO::Capture::Stdout->new;
+        $cserr->start;
+        $csout->start;
+        $me->capture_stderr($cserr);
+        $me->capture_stdout($csout);
+    }
     return $me; 
 }
 
@@ -82,6 +86,7 @@ sub analyse {
     my $me=shift;
 
     foreach my $mod (@{$me->mck->generators}) {
+        print "$mod\n" if $me->opts->{verbose};
         $mod->analyse($me);
     }
 }
@@ -143,16 +148,16 @@ __END__
 Module::CPANTS::Analyse - Generate Kwalitee ratings for a distribution
 
 =head1 SYNOPSIS
+    
+    use Module::CPANTS::Analyse;
 
-  my $analyser=Module::CPANTS::Analyse(
-    {
+    my $analyser=Module::CPANTS::Analyse({
         dist=>'path/to/Foo-Bar-1.42.tgz',
-    }
-  );
-  $a->unpack;
-  $a->analyse;
-  $a->calc_kwalitee;
-  # results are in $a->d;
+    });
+    $analyser->unpack;
+    $analyser->analyse;
+    $analyser->calc_kwalitee;
+    # results are in $analyser->d;
   
 =head1 DESCRIPTION
 

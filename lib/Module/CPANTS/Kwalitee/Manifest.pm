@@ -2,6 +2,7 @@ package Module::CPANTS::Kwalitee::Manifest;
 use warnings;
 use strict;
 use File::Spec::Functions qw(catfile);
+use Array::Diff;
 
 sub order { 100 }
 
@@ -15,12 +16,9 @@ sub analyse {
     
     my $files=$me->d->{files_array};
     my $distdir=$me->distdir;
-    
     my $manifest_file=catfile($distdir,'MANIFEST');
-    my $manifest_matches_dist=0;
 
     if (-e $manifest_file) {
-        
         # read manifest
         open(my $fh, '<', $manifest_file) || die "cannot read MANIFEST $manifest_file: $!";
         my @manifest;
@@ -31,22 +29,26 @@ sub analyse {
             push(@manifest,$_);
         }
         close $fh;
-        
-        if (@manifest == @$files) {
-            @manifest=sort @manifest;
-            my @files=sort @$files;
 
-            $manifest_matches_dist=1;
-            for my $i (0..$#manifest) {
-                if ($manifest[$i] ne $files[$i]) {
-                    $manifest_matches_dist=0;
-                    last;
-                }
-            }
+        @manifest=sort @manifest;
+        my @files=sort @$files;
+
+        my $diff=Array::Diff->diff(\@manifest,\@files);
+        if ($diff->count == 0) {
+            $me->d->{manifest_matches_dist}=1;
+        }
+        else {
+            $me->d->{manifest_matches_dist}=0;
+            my $error=
+                'MANIFEST ('.@manifest.') does not match dist ('.@files."):\n"
+                ."Missing in MANIFEST: ".join(', ',@{$diff->added})
+                ."\nMissing in Dist: " . join(', ',@{$diff->deleted});
+            $me->d->{error_manifest_matches_dist}=$error;
         }
     }
-
-    $me->d->{manifest_matches_dist}=$manifest_matches_dist;
+    else {
+        $me->d->{error_manifest_matches_dist}=q{Cannot find MANIFEST in dist.};
+    }
 }
 
 ##################################################################
@@ -57,7 +59,7 @@ sub kwalitee_indicators {
     return [
         {
             name=>'manifest_matches_dist',
-            error=>q{MANIFEST does not match the contents of this distribution.},
+            error=>q{MANIFEST does not match the contents of this distribution. See 'error_manifest_matches_dist' in the dist view for more info.},
             remedy=>q{Use a buildtool to generate the MANIFEST. Or update MANIFEST manually.},
             code=>sub { shift->{manifest_matches_dist} ? 1 : 0 },
         }

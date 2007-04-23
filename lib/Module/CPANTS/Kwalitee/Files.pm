@@ -2,7 +2,7 @@ package Module::CPANTS::Kwalitee::Files;
 use warnings;
 use strict;
 use File::Find;
-use File::Spec::Functions qw(catdir catfile abs2rel);
+use File::Spec::Functions qw(catdir catfile abs2rel splitdir);
 use File::stat;
 
 sub order { 10 }
@@ -33,15 +33,12 @@ sub analyse {
     $me->d->{files}=\@files;
     $me->d->{dirs}=\@dirs;
 
-    # find symlinks / bad_permissions
-    my (@symlinks,@bad_permissions);
+    # find symlinks
+    my @symlinks;
     foreach my $f (@dirs,@files) {
         my $p=catfile($distdir,$f);
         if (-l $f) {
             push(@symlinks,$f);
-        }
-        unless (-r _ && -w _) {
-            push(@bad_permissions,$f);
         }
     }
 
@@ -49,8 +46,6 @@ sub analyse {
     $me->d->{files}=scalar @files;
     $me->d->{files_list}=join(';',@files);
     $me->d->{files_array}=\@files;
-    $me->d->{bad_permissions}=scalar @bad_permissions;
-    $me->d->{bad_permissions_list}=join(';',@bad_permissions);
     $me->d->{dirs}=scalar @dirs;
     $me->d->{dirs_list}=join(';',@dirs);
     $me->d->{dirs_array}=\@dirs;
@@ -112,10 +107,11 @@ sub analyse {
 #-----------------------------------------------------------------
 sub get_files {
     return if /^\.+$/;
+    my $unixy=join('/',splitdir($File::Find::name));
     if (-d $_) {
-        push (@dirs,$File::Find::name);
+        push (@dirs,$unixy);
     } elsif (-f $_) {
-        push (@files,$File::Find::name);
+        push (@files,$unixy);
         $size+=-s _ || 0;
     }
 }
@@ -198,21 +194,14 @@ sub kwalitee_indicators {
         name=>'has_example',
         is_extra=>1,
         error=>'This distribution does not include examples.',
-        remedy=>q{Add a directory matching the regex (ex|eg|examples?|samples?|demos?) to your distribution that includes some scripts showing one or more use-cases of the distribution.},
+        remedy=>q{Add a directory matching the regex (ex|eg|examples?|samples?|demos?) or a file matching the regex /\/(examples?|samples?|demos?)\.p(m|od)$/i to your distribution that includes some scripts showing one or more use-cases of the distribution. },
         code=>sub {
             my $d=shift;
-            return 1 if grep {/^(ex|eg|examples?|samples?|demos?)\/\w/} @{ $d->{files_array} };
+            return 1 if grep {/^(ex|eg|examples?|samples?|demos?)\/\w/i} @{ $d->{files_array} };
+            return 1 if grep {/\/(examples?|samples?|demos?)\.p(m|od)$/i} @{ $d->{files_array} };
             return 0;
         },
     },
-
-# this might not be a good metric - at least according to feedback
-#    {
-#     name=>'permissions_ok',
-#     type=>'basic',
-#     error=>q{This distribution includes files with bad permissions (i.e that are not read- and writable by the user). This makes removing the extracted distribution hard.},
-#     code=>sub { shift->{bad_permissions} ? 0 : 1 },
-#    },
 ];
 }
 

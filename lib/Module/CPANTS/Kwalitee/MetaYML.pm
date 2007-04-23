@@ -50,7 +50,7 @@ sub kwalitee_indicators{
         },
         {
             name=>'metayml_conforms_spec_1_0',
-            error=>q{META.yml does not conform the the META.yml Spec 1.0. See 'metayml_error' in the dist view for more info.},
+            error=>q{META.yml does not conform to the META.yml Spec 1.0. See 'metayml_error' in the dist view for more info.},
             remedy=>q{Take a look at the META.yml Spec at http://module-build.sourceforge.net/META-spec-current.html and change your META.yml accordingly},
             code=>sub {
                 my $d=shift;
@@ -58,13 +58,13 @@ sub kwalitee_indicators{
             },
         },
         {
-            name=>'metayml_conforms_spec_1_2',
+            name=>'metayml_conforms_spec_current',
             is_extra=>1,
-            error=>q{META.yml does not conform the the META.yml Spec 1.2. See 'metayml_error' in the dist view for more info.},
+            error=>q{META.yml does not conform to the Current META.yml Spec (1.2). See 'metayml_error' in the dist view for more info.},
             remedy=>q{Take a look at the META.yml Spec at http://module-build.sourceforge.net/META-spec-current.html and change your META.yml accordingly},
             code=>sub {
                 my $d=shift;
-                return check_spec_conformance($d,'1.2',[qw(meta-spec name version abstract author license generated_by)]);
+                return check_spec_conformance($d,'current',[qw(meta-spec name version abstract author license generated_by)]);
             },
         },
     ];
@@ -80,7 +80,7 @@ sub check_spec_conformance {
     if (scalar keys %fields == 0) {
         return 1;
     } else {
-        $d->{meta_yml_error}.=join("",map {"'$_' missing (META.yml spec $version)\n"} keys %fields);
+        $d->{metayml_error}.=join("",map {"'$_' missing (META.yml spec $version)\n"} keys %fields);
         return 0;
     }
 }

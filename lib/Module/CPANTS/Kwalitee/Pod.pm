@@ -47,7 +47,7 @@ sub kwalitee_indicators {
     return [
         {
             name=>'no_pod_errors',
-            error=>q{The documentation for this distribution contains syntactic errors in its POD. Note that this metric tests all .pl, .pm and .pod files, even if they are in t/.},
+            error=>q{The documentation for this distribution contains syntactic errors in its POD. Note that this metric tests all .pl, .pm and .pod files, even if they are in t/. See 'pod_errors_msg' in the dist view for more info.},
             remedy=>q{Remove the POD errors. You can check for POD errors automatically by including Test::Pod to your test suite.},
             code=>sub { shift->{pod_errors} ? 0 : 1 },
         },
