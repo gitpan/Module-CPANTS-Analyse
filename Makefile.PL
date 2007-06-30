@@ -13,6 +13,7 @@ WriteMakefile
                            'Module::Pluggable' => '2.96',
                            'Array::Diff' => '0.04',
                            'YAML' => '0.58',
+                           'Test::YAML::Meta::Version' => '0.04',
                            'Pod::Simple::Checker' => '2.02',
                            'Class::Accessor' => '0.19',
                            'Archive::Any' => '0.06',

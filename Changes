@@ -4,6 +4,23 @@
 # $Date: 2006-11-04 09:02:03 +0100 (Sat, 04 Nov 2006) $ 
 #-----------------------------------------------------------------
 
+0.72    2007-06-30
+    - added docs to cpants_lint.pl 
+    - cpants_lint.pl can now dump metadata to a file
+    - added YAML output to cpants_lint.pl 
+    Gabor Szabo:
+    - added MCK::NeedsCompiler
+      MCK::NeedsCompiler does not contain any kwalitee_indicator, but
+      adds much needed metadata.
+    Barbie:
+    - MCA assumes Unix paths after munging with File::Spec, thus breaking 
+      portability at every turn in a non-Unix-like environment
+      ... bad Thomas no biscuit!
+    Barbie:
+    - Refined META.yml metrics using Test::YAML::Meta and brought 'current
+      spec' up to date with version 1.3 :)
+
+
 0.71    2007-04-23
     - moved svn repo to http://code.google.com/p/cpants/
     - has_license now also checks for LICENCE (as suggested by David
