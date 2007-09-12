@@ -13,7 +13,7 @@ use IO::Capture::Stderr;
 use YAML qw(LoadFile);
 
 use vars qw($VERSION);
-$VERSION=0.72;
+$VERSION=0.73;
 
 use Module::Pluggable search_path=>['Module::CPANTS::Kwalitee'];
 
@@ -101,8 +101,8 @@ sub calc_kwalitee {
     my $kwalitee=0;
     my %k;
     foreach my $mod (@{$me->mck->generators}) {
-        foreach my $i (@{$mod->kwalitee_indicators}) {
-            my $rv=$i->{code}($me->d);
+	foreach my $i (@{$mod->kwalitee_indicators}) {
+	    my $rv=$i->{code}($me->d);
             $k{$i->{name}}=$rv;
             $kwalitee+=$rv;
         }

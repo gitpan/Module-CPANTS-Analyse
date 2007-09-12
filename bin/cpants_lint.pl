@@ -25,7 +25,6 @@ my $mca=Module::CPANTS::Analyse->new({
     dist=>$dist,
     opts=>\%opts,
 });
-
 my $output;
 
 my $cannot_unpack=$mca->unpack;
@@ -100,9 +99,9 @@ else {
 if ($opts{to_file}) {
     my $dir=$opts{dir} || $cwd ;
     my $extension='.txt';
-    $extension='.dump' if $opts{dump};
-    $extension='.yaml' if $opts{yaml};
-    my $outfile=catfile($dir,$mca->d->{dist}.$extension);
+    $extension='.dmp' if $opts{dump};
+    $extension='.yml' if $opts{yaml};
+    my $outfile=catfile($dir,$mca->d->{vname}.$extension);
     open (my $fh,'>',$outfile) || die "Cannot write to $outfile: $!";
     print $fh $output;
     close $fh;
