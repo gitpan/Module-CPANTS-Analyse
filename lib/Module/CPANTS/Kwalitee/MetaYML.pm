@@ -2,7 +2,7 @@ package Module::CPANTS::Kwalitee::MetaYML;
 use warnings;
 use strict;
 use File::Spec::Functions qw(catfile);
-use YAML qw(LoadFile);
+use YAML::Syck qw(LoadFile);
 use Test::YAML::Meta::Version;
 
 sub order { 20 }
@@ -51,22 +51,25 @@ sub kwalitee_indicators{
                 my $yaml=$d->{meta_yml};
                 ($yaml->{license} and $yaml->{license} ne 'unknown') ? 1 : 0 }
         },
-        {
-            name=>'metayml_conforms_spec_1_0',
-            error=>q{META.yml does not conform to the META.yml Spec 1.0. See 'metayml_error' in the dist view for more info.},
-            remedy=>q{Take a look at the META.yml Spec at http://module-build.sourceforge.net/META-spec-current.html and change your META.yml accordingly},
-            code=>sub {
-                my $d=shift;
-                return check_spec_conformance($d,'1.0');
-            },
-        },
+#        {
+#            name=>'metayml_conforms_spec_1_0',
+#            error=>q{META.yml does not conform to the META.yml Spec 1.0. See 
+#            'metayml_error' in the dist view for more info.},
+#            remedy=>q{Take a look at the META.yml Spec at 
+#            http://module-build.sourceforge.net/META-spec-current.html and 
+#            change your META.yml accordingly},
+#            code=>sub {
+#                my $d=shift;
+#                return check_spec_conformance($d,'1.0');
+#            },
+#        },
         {
             name=>'metayml_conforms_to_known_spec',
             error=>q{META.yml does not conform to any recognised META.yml Spec. See 'metayml_error' in the dist view for more info.},
             remedy=>q{Take a look at the META.yml Spec at http://module-build.sourceforge.net/META-spec-current.html and change your META.yml accordingly},
             code=>sub {
                 my $d=shift;
-		return check_spec_conformance($d);
+                return check_spec_conformance($d);
             },
         },
     {
@@ -76,25 +79,43 @@ sub kwalitee_indicators{
             remedy=>q{Take a look at the META.yml Spec at http://module-build.sourceforge.net/META-spec-current.html and change your META.yml accordingly},
             code=>sub {
                 my $d=shift;
-                return check_spec_conformance($d,$CURRENT_SPEC);
+                return check_spec_conformance($d,$CURRENT_SPEC,1);
             },
         },
     ];
 }
 
 sub check_spec_conformance {
-    my ($d,$version)=@_;
+    my ($d,$version,$check_current)=@_;
     my $yaml=$d->{meta_yml};
-    my %hash;
-    $hash{spec} = $version if($version);
-    $hash{yaml} = $yaml;
+    my %hash=(
+        yaml=>$yaml,
+    );
+
+    if (!$version) {
+        if (my $from_yaml=$yaml->{'meta-spec'}{version}) {
+            $version = $from_yaml;
+        }
+        else {
+            $version='1.0';
+        }
+    }
+    $hash{spec} = $version;
 
     my $spec = Test::YAML::Meta::Version->new(%hash);
     if ($spec->parse()) {
-        $d->{metayml_error}.=join("",$spec->errors());
-        return 0;
+        my $report_version= $version || 'known';
+        my @errors;
+        foreach my $e ($spec->errors) {
+            next if $e=~/distribution_type/;
+            next if $e=~/specification URL/ && $check_current;
+            push @errors,$e;
+        }
+        if (@errors) {
+            $d->{metayml_error}.=$report_version.": ".join(" ",@errors)." ";
+            return 0;
+        }
     }
-
     return 1;
 }
 
