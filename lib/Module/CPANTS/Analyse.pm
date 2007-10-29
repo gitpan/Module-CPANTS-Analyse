@@ -12,7 +12,7 @@ use IO::Capture::Stdout;
 use IO::Capture::Stderr;
 use YAML::Syck qw(LoadFile);
 
-use version; our $VERSION=qv('0.74');
+use version; our $VERSION=version->new('0.75');
 
 use Module::Pluggable search_path=>['Module::CPANTS::Kwalitee'];
 
@@ -45,13 +45,12 @@ sub unpack {
     return 'cant find dist' unless $me->dist;
 
     copy($me->dist,$me->testfile);
-    chdir($me->testdir); 
     $me->d->{size_packed}=-s $me->testfile;
     
     my $archive;
     eval {
         $archive=Archive::Any->new($me->testfile);
-        $archive->extract();
+        $archive->extract($me->testdir);
     };
 
     if (my $error=$@) {
