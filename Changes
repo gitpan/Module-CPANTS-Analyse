@@ -2,7 +2,22 @@
 # Changes for Module::CPANTS::Analyse
 #-----------------------------------------------------------------
 
-0.75-tobe
+0.77	2008-01-29
+    - made 'prereq_matches_use' and 'build_prereq_matches_use' optional metrics
+    - changed data structure: all errors are now in a hashref called 'error'
+
+
+0.76    2007-11-14
+    - added new metrics 'prereq_matches_use' and
+      'build_prereq_matches_use'
+    - added 'needs_db' to metrics and removed hardcoded workaround for
+      is_prereq
+    - removed workaround in MCK::MetaYML (Barbie fixed it the problem
+      in Test::YAML::Meta)
+    - reworded metayml_is_parsable remedy
+
+
+0.75    2007-10-29
     - added optional metric use_warnings
     - added directory 'xt' as a potential location for test files:w
     - finally applied patch provided by Adriano Ferreira to fix some

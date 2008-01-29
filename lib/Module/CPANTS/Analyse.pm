@@ -12,7 +12,7 @@ use IO::Capture::Stdout;
 use IO::Capture::Stderr;
 use YAML::Syck qw(LoadFile);
 
-use version; our $VERSION=version->new('0.75');
+use version; our $VERSION=version->new('0.77');
 
 use Module::Pluggable search_path=>['Module::CPANTS::Kwalitee'];
 
@@ -57,7 +57,7 @@ sub unpack {
         $me->capture_stdout->stop;
         $me->capture_stderr->stop;
         $me->d->{extractable}=0;
-        $me->d->{cpants_errors}=$error;
+        $me->d->{error}{cpants}=$error;
         $me->d->{kwalitee}{extractable}=0;
         my ($vol,$dir,$name)=splitpath($me->dist);
         $name=~s/\..*$//;
@@ -99,8 +99,9 @@ sub calc_kwalitee {
     my $kwalitee=0;
     my %k;
     foreach my $mod (@{$me->mck->generators}) {
-	foreach my $i (@{$mod->kwalitee_indicators}) {
-	    my $rv=$i->{code}($me->d);
+        foreach my $i (@{$mod->kwalitee_indicators}) {
+            next if $i->{needs_db};
+            my $rv=$i->{code}($me->d);
             $k{$i->{name}}=$rv;
             $kwalitee+=$rv;
         }

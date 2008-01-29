@@ -91,8 +91,8 @@ sub kwalitee_indicators {
                 my $d=shift;
                 my $modules=$d->{modules};
                 my $uses=$d->{uses};
+                use Data::Dumper;
                 return 0 unless $modules && $uses;
-                
                 my ($warnings)=$uses->{'warnings'};
                 return 0 unless $warnings;
                 return 1 if $warnings->{in_code} >= @$modules;
