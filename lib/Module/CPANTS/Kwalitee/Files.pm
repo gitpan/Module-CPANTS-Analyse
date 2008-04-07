@@ -1,10 +1,12 @@
 package Module::CPANTS::Kwalitee::Files;
 use warnings;
 use strict;
-use File::Find;
+use File::Find::Rule;
 use File::Spec::Functions qw(catdir catfile abs2rel splitdir);
 use File::stat;
 use File::Basename;
+use Data::Dumper;
+use Readonly;
 
 sub order { 10 }
 
@@ -12,34 +14,34 @@ sub order { 10 }
 # Analyse
 ##################################################################
 
-# global values needed for File::Find
-our @files=();
-our @dirs=();
-our $size=0;
+Readonly::Scalar my $large_file => 100_000;
+
 my %generated_db_files;
-my $match_version = qr/\A\s*   (?:our)?  \s*  \$VERSION \s*=\s*    (['"]?)([^; ]+)\1   \s*;\s*\z/x;
 
 sub analyse {
     my $class=shift;
     my $me=shift;
     my $distdir=$me->distdir;
     
-    # use File::Find to get unpacked size & filelist
-    @files=(); @dirs=(); $size=0;
-    find(\&get_files,$distdir);
+    my @files = File::Find::Rule->file()->relative()->in($distdir);
+    my @dirs  = File::Find::Rule->directory()->relative()->in($distdir);
+    #my $unixy=join('/',splitdir($File::Find::name));
+
+    my $size = 0;
+    my %files;
+    foreach my $name (@files) { 
+        $files{$name}{size} += -s catfile($distdir, $name) || 0;
+        $size += $files{$name}{size};
+    }
+    #die Dumper \%files;
     $me->d->{size_unpacked}=$size;
 
-    # munge filelist
-    my $moddir = basename($distdir);
-    @files = map {s!^.*?$moddir/!!;$_} @files;
-    @dirs  = map {s!^.*?$moddir/!!;$_} @dirs;
-
-    $me->d->{files}=\@files;
+    $me->d->{files}=\%files;
     $me->d->{dirs}=\@dirs;
 
     # find symlinks
     my @symlinks;
-    foreach my $f (@dirs,@files) {
+    foreach my $f (@dirs, @files) {
         my $p=catfile($distdir,$f);
         if (-l $f) {
             push(@symlinks,$f);
@@ -50,6 +52,7 @@ sub analyse {
     $me->d->{files}=scalar @files;
     $me->d->{files_list}=join(';',@files);
     $me->d->{files_array}=\@files;
+    $me->d->{files_hash}=\%files;
     $me->d->{dirs}=scalar @dirs;
     $me->d->{dirs_list}=join(';',@dirs);
     $me->d->{dirs_array}=\@dirs;
@@ -112,7 +115,7 @@ sub analyse {
             my $path = catfile($me->distdir,$file);
             next if not -e $path;
             if (open my $fh, '<', $path) {
-                if (grep {/STDIN/} <$fh>) {
+                if (grep {/<STDIN>/} <$fh>) {
                     $me->d->{$handle} = 1;
                 }
             }
@@ -131,20 +134,6 @@ sub map_filenames {
         $ret{$db_file}=$file;
     }
     return %ret;
-}
-
-#-----------------------------------------------------------------
-# get_files
-#-----------------------------------------------------------------
-sub get_files {
-    return if /^\.+$/;
-    my $unixy=join('/',splitdir($File::Find::name));
-    if (-d $_) {
-        push (@dirs,$unixy);
-    } elsif (-f $_) {
-        push (@files,$unixy);
-        $size+=-s _ || 0;
-    }
 }
 
 ##################################################################
@@ -250,7 +239,6 @@ sub kwalitee_indicators {
         remedy=>q{Remove the offending file!},
         code=>sub {
             my $d=shift;
-            #use Data::Dumper;
             #die Dumper \%generated_db_files;
             my @errors = map { $generated_db_files{$_} }
                          grep { $d->{$_} }
@@ -273,6 +261,24 @@ sub kwalitee_indicators {
             my $d=shift;
             if ($d->{stdin_in_makefile_pl}||$d->{stdin_in_build_pl}) {
                 $d->{error}{no_stdin_for_prompting} = "Make sure STDIN is not used in Makefile.PL or Build.PL see http://www.perlfoundation.org/perl5/index.cgi?cpan_packaging";
+                return 0;
+            }
+            return 1;
+        },
+    },
+    {
+        name=>'no_large_files',
+        error=>q{This distribution has at least one file larger than $large_file bytes)},
+        remedy=>q{No remedy for that.},
+        is_extra=>1,
+        is_experimental=>1,
+        code=>sub {
+            my $d=shift;
+            my @errors = map { "$_:$d->{files_hash}{$_}{size}" }
+                         grep { $d->{files_hash}{$_}{size} > $large_file }
+                         keys %{ $d->{files_hash} };
+            if (@errors) {
+                $d->{error}{no_large_files} = join "; ", @errors;
                 return 0;
             }
             return 1;

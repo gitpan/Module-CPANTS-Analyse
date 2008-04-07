@@ -1,4 +1,4 @@
-use Test::More tests => 2;
+use Test::More tests => 18;
 
 use Module::CPANTS::Analyse;
 use File::Spec::Functions;
@@ -9,7 +9,26 @@ my $a=Module::CPANTS::Analyse->new({
 
 my $rv=$a->unpack;
 is($rv,undef,'unpack ok');
+
 $a->analyse;
+
+my $d=$a->d;
+
+is($d->{files},9,'files');
+is($d->{size_packed},7736,'size_packed');
+is(ref($d->{modules}),'ARRAY','modules is ARRAY');
+is($d->{modules}[0]->{module},'Acme::DonMartin','module');
+is(ref($d->{prereq}),'ARRAY','prereq is ARRAY');
+is($d->{prereq}[0]->{requires},'Compress::Zlib','prereq');
+is(ref($d->{uses}),'HASH','uses is HASH');
+is($d->{uses}{'Compress::Zlib'}{module},'Compress::Zlib','uses Compress::Zlib in module');
+is($d->{uses}{'Test::More'}{in_tests},1,'uses Test::More in tests');
+ok($d->{file_meta_yml},'has_yaml');
+ok($d->{metayml_is_parsable},'metayml_is_parsable');
+ok(!$d->{metayml_parse_error},'metayml_parse_error was not set');
+ok(!$d->{license},'no license in META.yml');
+
+
 $a->calc_kwalitee;
 
 my $kw=$a->d->{kwalitee};
@@ -26,7 +45,7 @@ my $expected_kwalitee =  {
            'has_changelog' => 1,
            'no_pod_errors' => 1,
            'use_strict' => 1,
-           'kwalitee' => 27,
+           'kwalitee' => 28,
            'has_test_pod' => 1,
            'has_tests' => 1,
            'easily_repackageable_by_debian' => 1,
@@ -50,11 +69,28 @@ my $expected_kwalitee =  {
            'has_proper_version' => 1,
            'metayml_conforms_to_known_spec' => 0,
            'no_stdin_for_prompting' => 1,
+           'metayml_declares_perl_version' => 0,
+           'no_large_files' => 1,
          };
 
 is_deeply($kw, $expected_kwalitee, 'metrics are as expected');
 
+is $a->d->{size_packed}, 7736, 'size_packed';
+is $a->d->{size_unpacked}, 14805, 'size_unpacked';
+is_deeply $a->d->{files_array}, [
+          'MANIFEST',
+          'META.yml',
+          'DonMartin.pm',
+          'Changes',
+          'README',
+          'Makefile.PL',
+          't/01-basic.t',
+          'eg/freq.pl',
+          'eg/hello.pl'
+        ], 'files_array';
+
+
 #use Data::Dumper;
 #diag(Dumper $kw);
-#diag(Dumper $a->d);
+#diag(Dumper $a);
 

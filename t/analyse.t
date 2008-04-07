@@ -1,33 +1,77 @@
-use Test::More tests => 14;
+use Test::More;
 
 use Module::CPANTS::Analyse;
 use File::Spec::Functions;
-my $a=Module::CPANTS::Analyse->new({
-    dist=>'t/eg/Acme-DonMartin-0.06.tar.gz',
-    _dont_cleanup=>$ENV{DONT_CLEANUP},
-});
+use Data::Dumper;
 
-my $rv=$a->unpack;
-is($rv,undef,'unpack ok');
+my @tests = (
+#    {
+#        dist => 't/eg/Acme-DonMartin-0.06.tar.gz',
+#    },
+    {
+        dist => 't/eg/Text-CSV_XS-0.40.tgz',
+        kwalitee => {
+           'extracts_nicely' => 1,
+           'has_buildtool' => 1,
+           'has_readme' => 1,
+           'manifest_matches_dist' => 1,
+           'metayml_declares_perl_version' => 0,
+           'has_example' => 1,
+           'has_test_pod_coverage' => 1,
+           'metayml_is_parsable' => 1,
+           'proper_libs' => 1,
+           'has_changelog' => 1,
+           'no_pod_errors' => 1,
+           'use_strict' => 1,
+           'kwalitee' => 35,
+           'no_stdin_for_prompting' => 1,
+           'has_test_pod' => 1,
+           'easily_repackageable' => 1,
+           'easily_repackageable_by_fedora' => 1,
+           'has_tests' => 1,
+           'easily_repackageable_by_debian' => 1,
+           'has_manifest' => 1,
+           'no_symlinks' => 1,
+           'has_version' => 1,
+           'extractable' => 1,
+           'buildtool_not_executable' => 1,
+           'has_working_buildtool' => 1,
+           'metayml_has_license' => 1,
+           'has_humanreadable_license' => 1,
+           'no_generated_files' => 1,
+           'has_meta_yml' => 1,
+           'metayml_conforms_spec_current' => 1,
+           'use_warnings' => 1,
+           'no_large_files' => 0,
+           'no_cpants_errors' => 1,
+           'has_tests_in_t_dir' => 1,
+           'has_version_in_each_file' => 1,
+           'fits_fedora_license' => 1,
+           'has_proper_version' => 1,
+           'metayml_conforms_to_known_spec' => 1
+         },
+    },
+);
 
-$a->analyse;
+plan tests => 2 * @tests;
 
-my $d=$a->d;
+foreach my $t (@tests) {
+    my $a=Module::CPANTS::Analyse->new({
+        dist=> $t->{dist},
+        _dont_cleanup=>$ENV{DONT_CLEANUP},
+    });
 
-is($d->{files},9,'files');
-is($d->{size_packed},7736,'size_packed');
-is(ref($d->{modules}),'ARRAY','modules is ARRAY');
-is($d->{modules}[0]->{module},'Acme::DonMartin','module');
-is(ref($d->{prereq}),'ARRAY','prereq is ARRAY');
-is($d->{prereq}[0]->{requires},'Compress::Zlib','prereq');
-is(ref($d->{uses}),'HASH','uses is HASH');
-is($d->{uses}{'Compress::Zlib'}{module},'Compress::Zlib','uses Compress::Zlib in module');
-is($d->{uses}{'Test::More'}{in_tests},1,'uses Test::More in tests');
-ok($d->{file_meta_yml},'has_yaml');
-ok($d->{metayml_is_parsable},'metayml_is_parsable');
-ok(!$d->{metayml_parse_error},'metayml_parse_error was not set');
-ok(!$d->{license},'no license in META.yml');
+    my $rv=$a->unpack;
+    is($rv,undef,'unpack ok');
 
-#use Data::Dumper;
-#diag(Dumper $d);
+    $a->analyse;
+    $a->calc_kwalitee;
+
+    my $d=$a->d;
+    my $kw=$a->d->{kwalitee};
+    is_deeply($kw, $t->{kwalitee}, "kwalitee of $t->{dist}");
+    #diag(Dumper $kw);
+}
+
+
 
