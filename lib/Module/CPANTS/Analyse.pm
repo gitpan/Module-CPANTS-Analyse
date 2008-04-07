@@ -12,7 +12,7 @@ use IO::Capture::Stdout;
 use IO::Capture::Stderr;
 use YAML::Syck qw(LoadFile);
 
-use version; our $VERSION=version->new('0.77');
+use version; our $VERSION=version->new('0.78');
 
 use Module::Pluggable search_path=>['Module::CPANTS::Kwalitee'];
 
@@ -29,7 +29,7 @@ sub new {
 
     $me->mck(Module::CPANTS::Kwalitee->new);
     
-    unless ($me->opts->{no_capture}) {
+    unless ($me->opts->{no_capture} or $INC{'Test/More.pm'}) {
         my $cserr=IO::Capture::Stderr->new;
         my $csout=IO::Capture::Stdout->new;
         $cserr->start;
@@ -54,8 +54,10 @@ sub unpack {
     };
 
     if (my $error=$@) {
-        $me->capture_stdout->stop;
-        $me->capture_stderr->stop;
+        if (not $INC{'Test/More.pm'}) {
+            $me->capture_stdout->stop;
+            $me->capture_stderr->stop;
+        }
         $me->d->{extractable}=0;
         $me->d->{error}{cpants}=$error;
         $me->d->{kwalitee}{extractable}=0;
@@ -88,7 +90,7 @@ sub analyse {
     my $me=shift;
 
     foreach my $mod (@{$me->mck->generators}) {
-        print "$mod\n" if $me->opts->{verbose};
+        print "analyse $mod\n" if $me->opts->{verbose};
         $mod->analyse($me);
     }
 }
@@ -97,18 +99,19 @@ sub calc_kwalitee {
     my $me=shift;
 
     my $kwalitee=0;
-    my %k;
+    $me->d->{kwalitee}={};
     foreach my $mod (@{$me->mck->generators}) {
         foreach my $i (@{$mod->kwalitee_indicators}) {
             next if $i->{needs_db};
-            my $rv=$i->{code}($me->d);
-            $k{$i->{name}}=$rv;
+            print $i->{name}."\n" if $me->opts->{verbose};
+            my $rv=$i->{code}($me->d, $i);
+            $me->d->{kwalitee}{$i->{name}}=$rv;
             $kwalitee+=$rv;
         }
     }
-    $k{'kwalitee'}=$kwalitee;
+    $me->d->{'kwalitee'}{'kwalitee'}=$kwalitee;
+    print "done\n" if $me->opts->{verbose};
     
-    $me->d->{kwalitee}=\%k;
 }
 
 #----------------------------------------------------------------

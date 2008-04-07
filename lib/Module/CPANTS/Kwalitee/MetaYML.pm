@@ -2,7 +2,7 @@ package Module::CPANTS::Kwalitee::MetaYML;
 use warnings;
 use strict;
 use File::Spec::Functions qw(catfile);
-use YAML::Syck qw(LoadFile);
+use YAML::Syck qw(Load LoadFile);
 use Test::YAML::Meta::Version;
 
 sub order { 20 }
@@ -16,16 +16,19 @@ my $CURRENT_SPEC = '1.3';
 sub analyse {
     my $class=shift;
     my $me=shift;
-
     my $files=$me->d->{files_array};
     my $distdir=$me->distdir;
     if (grep {/^META\.yml$/} @$files) {
         eval {
-            $me->d->{meta_yml}=LoadFile(catfile($distdir,'META.yml'));
+            open(my $FH,'<',catfile($distdir,'META.yml')) || die "Cannot read META.yml: $!";
+            my $yml=join('',<$FH>);
+            close $FH;
+            die "I do not want to handle stuff like version: !!perl/hash:version" if $yml=~/ !perl/;
+            $me->d->{meta_yml}=Load($yml);
             $me->d->{metayml_is_parsable}=1;
         };
         if ($@) {
-            $me->d->{error}{metayml_parse}=$@;
+            $me->d->{error}{metayml_is_parsable}=$@;
         }
     }    
 }
@@ -38,7 +41,7 @@ sub kwalitee_indicators{
     return [
         {
             name=>'metayml_is_parsable',
-            error=>q{The META.yml file of this distributioncould not be parsed by the version of YAML.pm CPANTS is using. See 'metayml_parse' in the dist error view for more info.},
+            error=>q{The META.yml file of this distributioncould not be parsed by the version of YAML.pm CPANTS is using.},
             remedy=>q{If you don't have one, add a META.yml file. Else, upgrade your YAML generator so it produces valid YAML.},
             code=>sub { shift->{metayml_is_parsable} ? 1 : 0 }
         },
@@ -75,6 +78,7 @@ sub kwalitee_indicators{
 
 sub check_spec_conformance {
     my ($d,$version,$check_current)=@_;
+    
     my $yaml=$d->{meta_yml};
     my %hash=(
         yaml=>$yaml,
@@ -89,7 +93,6 @@ sub check_spec_conformance {
         }
     }
     $hash{spec} = $version;
-
     my $spec = Test::YAML::Meta::Version->new(%hash);
     if ($spec->parse()) {
         my $report_version= $version || 'known';
@@ -99,7 +102,8 @@ sub check_spec_conformance {
             push @errors,$e;
         }
         if (@errors) {
-            $d->{error}{metayml}.=$report_version.": ".join(" ",@errors)." ";
+            my $errorname='metayml_conforms_'.($check_current?'spec_current':'to_known_spec');
+            $d->{error}{$errorname}.=$report_version.": ".join(" ",@errors)." ";
             return 0;
         }
     }

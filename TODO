@@ -10,11 +10,12 @@
 #-----------------------------------------------------------------
 
 Robert 'phaylon' Sedlacek <phaylon@dunkelheit.at>
-  2. Bei einer $VERSION = '0.01_02'; bekomme ich von cpants_lint.pl die           
   Meldung, dass 'has_proper_version' nicht bestanden wird.     
 
 http://rt.cpan.org/Ticket/Display.html?id=21370
   Win32 test fail:  analyse.t, analyse_afs.t, calc.t, testfile.t
+
+Moose and MooseX turn on strict, so count Moose[X] as use_strict
 
 #-----------------------------------------------------------------
 # New Metrics
@@ -24,15 +25,68 @@ http://rt.cpan.org/Ticket/Display.html?id=21370
 - has_valid_filenames
 - declares_dependencies
 - no_open_bugs
+- no_old_open_bugs  (older than a year?)
+
+- no_bugs_in_debian  (The Debian ppl will provide the interface)
 
 - Signature checking ?
 - has_rating ?
 - relation of subs to lines of code ?
 
-- change has_license to has_license_in_yaml,
-  put the actual name of the license (perl, etc.) in the 
-  database for later retreival
-- has_license_in_source
+- easily_repackagable
+- easily_repackagable_by_debian
+- easily_repackagable_by_fedora
+  on http://www.perlfoundation.org/perl5/index.cgi?cpan_packaging
+  there are guidelines for module authors to make their modules easily
+  repackagable by downstream distros.
+  It  would be great if we could add as many to CPANTS as possible.
+  Some we can check without executing code.
+  Others might be verified by the CPAN Testers, reported by the tools
+  and then collected from the reports by CPANTS.
+
+- version_number_is_sane
+  There are several issues here: 
+  1) Is the version number sane for perl (I think there is a metric already)
+  2) Is the version number sane for Debian/RedHat (they have different meaning of sane)
+  3) Is the scheme of the version numbers stable? (In Debian they don't like when ppl are
+     changing from D.DD to a D.D scheme or vice versa.
+
+  1.1.1 is not considered correct by MakeMaker but it is currently accepted by CPANTS
+  http://cpants.perl.org/dist/kwalitee/Sys-HostIP
+  http://www.nntp.perl.org/group/perl.qa/2007/12/msg10025.html
+
+- has_same_version_number_in_all_files ???
+  Some people will argue that when one of the files does not change, there is no
+  need to change its version number. So this might not be a good metric.
+
+- was_patched_by_debian
+  indicates that the version in Debian was patched
+  this information must be  fetched from the Debian repository and we have to make sure
+  that the patch in Debian is agains the latest version so we won't penalize a module
+  because Debian has not yet integrated the newer version that possibly already includes
+  the patch.
+
+- has_patches_in_freebsd
+  We should have an optional negative metric in case the module is
+  included in FreeBSD but is patched. (Maybe we need to make sure
+  that we set this negative metric only when the versions are the same.
+
+
+- has_no_indirect_code
+  Check the source code (and/or) the documentation if you see 
+  new Module::Name anywhere mark the metric as failed.
+
+- declares_minimal_version_of_perl
+  It has "use N" somewhere in the Makefile.PL and/or Build.PL and/or the source code.
+  (and they match to each other :-)
+  (No specific N should be required)
+
+- "something about has good perl code"
+  (e.g. if uses 3 param open but does not say use perl 5.6 or similar)
+
+
+- has_humanreadable_license
+  the actual name of the license (perl, etc.) is in the database, use it 
     Module::License::Report  integration
     (though I am not sure if that should mean the main .pm
         file only or all the files or what)
@@ -44,5 +98,30 @@ http://rt.cpan.org/Ticket/Display.html?id=21370
 
 - include more dists in test (for better test coverage)
 
-improve NeedsCompiler (see its TODO)
+- improve NeedsCompiler (see its TODO)
+
+- Perl Critic report:
+  As this is not really in the consensus probably it is better not add it as 
+  a metric now but it might be nice to run it on each module 
+  (starting at leevel 5 ) and display it along with the metrics.
+  Maybe it can be added as an optional metric.
+
+
+
+
+- http://cpants.perl.org/author/search should also work on partial names
+  adding % % automatically (or at least tell the users on the search page to
+  use % as widecards.
+
+- create stats (or metrics) for distros that were uploaded recently with failing metrics.
+  e.g. the fact that 9920 Distributions failing 'metayml_has_license' is skewed by the
+  many modules that were not updated in the past 1-2 years. It would be more important
+  to see the number of modules uploaded in the last year without metayml of without license
+  field in the metayaml.
+
+- Export the kwalitee of each distro in a csv file like so it can be easily integrated into
+  other web sites such as the search engines.
+
+- Export the kwalitee of each distro in a csv file like so it can be easily integrated into
+  other web sites such as the search engines.
 

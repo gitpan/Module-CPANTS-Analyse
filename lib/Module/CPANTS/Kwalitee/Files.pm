@@ -16,6 +16,8 @@ sub order { 10 }
 our @files=();
 our @dirs=();
 our $size=0;
+my %generated_db_files;
+my $match_version = qr/\A\s*   (?:our)?  \s*  \$VERSION \s*=\s*    (['"]?)([^; ]+)\1   \s*;\s*\z/x;
 
 sub analyse {
     my $class=shift;
@@ -57,11 +59,9 @@ sub analyse {
     # find special files
     my %reqfiles;
     my @special_files=(qw(Makefile.PL Build.PL META.yml SIGNATURE MANIFEST NINJA test.pl LICENSE));
-    foreach my $file (@special_files){
-        (my $db_file=$file)=~s/\./_/g;
-        $db_file="file_".lc($db_file);
-        $me->d->{$db_file}=((grep {$_ eq "$file"} @files)?1:0);
-    }
+    map_filenames($me, \@special_files, \@files);
+    my @generated_files=qw(Build Makefile _build blib pm_to_blib); # files that should not...
+    %generated_db_files=map_filenames($me, \@generated_files, \@files);
 
     # find more complex files
     my %regexs=(
@@ -101,7 +101,36 @@ sub analyse {
         $build_exe=3 unless ($me->d->{file_makefile_pl} || $me->d->{file_build_pl});
         $me->d->{buildfile_executable}=$build_exe;
     }
+
+    # check STDIN in Makefile.PL and Build.PL 
+    # objective: convince people to use prompt();
+    # http://www.perlfoundation.org/perl5/index.cgi?cpan_packaging
+    {
+        foreach my $file ('Makefile.PL', 'Build.PL') {
+            (my $handle = $file) =~ s/\./_/;
+            $handle = "stdin_in_" . lc $handle;
+            my $path = catfile($me->distdir,$file);
+            next if not -e $path;
+            if (open my $fh, '<', $path) {
+                if (grep {/STDIN/} <$fh>) {
+                    $me->d->{$handle} = 1;
+                }
+            }
+        } 
+    } 
     return;
+}
+
+sub map_filenames {
+    my ($me, $special_files, $files) = @_;
+    my %ret;
+    foreach my $file (@$special_files){
+        (my $db_file=$file)=~s/\./_/g;
+        $db_file="file_".lc($db_file);
+        $me->d->{$db_file}=((grep {$_ eq "$file"} @$files)?1:0);
+        $ret{$db_file}=$file;
+    }
+    return %ret;
 }
 
 #-----------------------------------------------------------------
@@ -175,7 +204,7 @@ sub kwalitee_indicators {
         error=>q{This distribution includes symbolic links (symlinks). This is bad, because there are operating systems that do not handle symlinks.},
         remedy=>q{Remove the symlinkes from the distribution.},
         code=>sub {shift->{symlinks} ? 0 : 1},
-        },
+    },
     {
         name=>'has_tests',
         error=>q{This distribution doesn't contain either a file called 'test.pl' or a directory called 't'. This indicates that it doesn't contain even the most basic test-suite. This is really BAD!},
@@ -183,6 +212,17 @@ sub kwalitee_indicators {
         code=>sub {
             my $d=shift;
             return 1 if $d->{file_test_pl} || $d->{dir_t};
+            return 0;
+        },
+    },
+    {
+        name=>'has_tests_in_t_dir',
+        is_extra=>1,
+        error=>q{This distribution contains either a file called 'test.pl' (the old test file) or is missing a directory called 't'. This indicates that it uses the old test mechanism or it has no test-suite.},
+        remedy=>q{Add tests or move tests.pl to the t/ directory!},
+        code=>sub {
+            my $d=shift;
+            return 1 if !$d->{file_test_pl} && $d->{dir_t};
             return 0;
         },
     },
@@ -202,6 +242,40 @@ sub kwalitee_indicators {
             return 1 if grep {/^(ex|eg|examples?|samples?|demos?)\/\w/i} @{ $d->{files_array} };
             return 1 if grep {/\/(examples?|samples?|demos?)\.p(m|od)$/i} @{ $d->{files_array} };
             return 0;
+        },
+    },
+    {
+        name=>'no_generated_files',
+        error=>q{This distribution has a file that it should generate and not be distribute.},
+        remedy=>q{Remove the offending file!},
+        code=>sub {
+            my $d=shift;
+            #use Data::Dumper;
+            #die Dumper \%generated_db_files;
+            my @errors = map { $generated_db_files{$_} }
+                         grep { $d->{$_} }
+                         keys %generated_db_files;
+            #die $d->{build};
+            if (@errors) {
+                $d->{error}{no_generated_files} = join ", ", @errors;
+                
+                return 0;
+            }
+            return 1;
+        },
+    },
+    {
+        name=>'no_stdin_for_prompting',
+        error=>q{This distribution is using direct call from STDIN instead of prompt())},
+        is_extra=>1,
+        remedy=>q{Use the prompt() method},
+        code=>sub {
+            my $d=shift;
+            if ($d->{stdin_in_makefile_pl}||$d->{stdin_in_build_pl}) {
+                $d->{error}{no_stdin_for_prompting} = "Make sure STDIN is not used in Makefile.PL or Build.PL see http://www.perlfoundation.org/perl5/index.cgi?cpan_packaging";
+                return 0;
+            }
+            return 1;
         },
     },
 ];
@@ -233,6 +307,10 @@ Find various files and directories that should be part of every self-respecting 
 Defines the order in which Kwalitee tests should be run.
 
 Returns C<10>, as data generated by C<MCK::Files> is used by all other tests.
+
+=head3 map_filenames
+
+get db_filenames from real_filenames
 
 =head3 analyse
 
@@ -266,9 +344,17 @@ Returns the Kwalitee Indicators datastructure.
 
 =item * has_tests
 
+=item * has_tests_in_t_dir
+
 =item * buildfile_not_executabel
 
 =item * has_example (optional)
+
+=item * no_generated_file
+
+=item * has_version_in_each_file
+
+=item * no_stdin_for_prompting
 
 =back
 
