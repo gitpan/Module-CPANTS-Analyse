@@ -2,6 +2,8 @@ use Test::More tests => 18;
 
 use Module::CPANTS::Analyse;
 use File::Spec::Functions;
+use Test::Deep;
+
 my $a=Module::CPANTS::Analyse->new({
     dist=>'t/eg/Acme-DonMartin-0.06.tar.gz',
     _dont_cleanup=>$ENV{DONT_CLEANUP},
@@ -71,13 +73,16 @@ my $expected_kwalitee =  {
            'no_stdin_for_prompting' => 1,
            'metayml_declares_perl_version' => 0,
            'no_large_files' => 1,
+           'has_separate_license_file' => 0,
+           'has_license_in_source_file' => 0,
+           'metayml_has_provides'=>0,
          };
 
 is_deeply($kw, $expected_kwalitee, 'metrics are as expected');
 
 is $a->d->{size_packed}, 7736, 'size_packed';
 is $a->d->{size_unpacked}, 14805, 'size_unpacked';
-is_deeply $a->d->{files_array}, [
+cmp_bag $a->d->{files_array}, [
           'MANIFEST',
           'META.yml',
           'DonMartin.pm',

@@ -18,10 +18,16 @@ my $build = Module::Build->new(
         'Test::YAML::Meta::Version' => '0.06',
         'version'                   => '0.73',
         'List::MoreUtils'           => '0',
-        'Test::Warn'                => '0',
         'File::Find::Rule'          => '0',
         'Readonly'                  => '0',
+        'Software::License'         => '0.002',
+        'File::Slurp'               => '0',
     },
+    build_requires => {
+        'Test::Deep'                => '0',
+        'Test::Warn'                => '0',
+        'Test::NoWarnings'          => '0',
+    }, 
     script_files=>[qw(bin/cpants_lint.pl)],
     create_makefile_pl=>'traditional',
 );

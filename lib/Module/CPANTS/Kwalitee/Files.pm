@@ -7,6 +7,8 @@ use File::stat;
 use File::Basename;
 use Data::Dumper;
 use Readonly;
+use Software::LicenseUtils;
+use File::Slurp            qw(slurp);
 
 sub order { 10 }
 
@@ -14,7 +16,7 @@ sub order { 10 }
 # Analyse
 ##################################################################
 
-Readonly::Scalar my $large_file => 100_000;
+Readonly::Scalar my $large_file => 200_000;
 
 my %generated_db_files;
 
@@ -29,10 +31,30 @@ sub analyse {
 
     my $size = 0;
     my %files;
+    my %licenses;
     foreach my $name (@files) { 
-        $files{$name}{size} += -s catfile($distdir, $name) || 0;
+        my $path = catfile($distdir, $name);
+        $files{$name}{size} += -s $path || 0;
         $size += $files{$name}{size};
+
+        if ($name =~ /\.(pl|pm|pod)$/) {
+            my $text = slurp($path);
+            my $license = Software::LicenseUtils->guess_license_from_pm($text);
+            if ($license) {
+                $licenses{$license} = $name;
+                $files{$name}{license} = $license;
+            }
+        }
     }
+    if (%licenses) {
+        $me->d->{licenses} = \%licenses;
+        if (keys %licenses == 1) {
+            my ($type) = keys %licenses;
+            $me->d->{license_type} = $type;
+            $me->d->{license_file} = $licenses{$type};
+        }
+    }
+
     #die Dumper \%files;
     $me->d->{size_unpacked}=$size;
 
@@ -61,7 +83,7 @@ sub analyse {
 
     # find special files
     my %reqfiles;
-    my @special_files=(qw(Makefile.PL Build.PL META.yml SIGNATURE MANIFEST NINJA test.pl LICENSE));
+    my @special_files=(qw(Makefile.PL Build.PL META.yml SIGNATURE MANIFEST NINJA test.pl LICENSE LICENCE));
     map_filenames($me, \@special_files, \@files);
     my @generated_files=qw(Build Makefile _build blib pm_to_blib); # files that should not...
     %generated_db_files=map_filenames($me, \@generated_files, \@files);
@@ -225,10 +247,10 @@ sub kwalitee_indicators {
         name=>'has_example',
         is_extra=>1,
         error=>'This distribution does not include examples.',
-        remedy=>q{Add a directory matching the regex (ex|eg|examples?|samples?|demos?) or a file matching the regex /\/(examples?|samples?|demos?)\.p(m|od)$/i to your distribution that includes some scripts showing one or more use-cases of the distribution. },
+        remedy=>q{Add a directory matching the regex (bin|scripts?|ex|eg|examples?|samples?|demos?) or a file matching the regex /\/(examples?|samples?|demos?)\.p(m|od)$/i to your distribution that includes some scripts showing one or more use-cases of the distribution. },
         code=>sub {
             my $d=shift;
-            return 1 if grep {/^(ex|eg|examples?|samples?|demos?)\/\w/i} @{ $d->{files_array} };
+            return 1 if grep {/^(bin|scripts?|ex|eg|examples?|samples?|demos?)\/\w/i} @{ $d->{files_array} };
             return 1 if grep {/\/(examples?|samples?|demos?)\.p(m|od)$/i} @{ $d->{files_array} };
             return 0;
         },
@@ -268,7 +290,7 @@ sub kwalitee_indicators {
     },
     {
         name=>'no_large_files',
-        error=>q{This distribution has at least one file larger than $large_file bytes)},
+        error=>qq{This distribution has at least one file larger than $large_file bytes)},
         remedy=>q{No remedy for that.},
         is_extra=>1,
         is_experimental=>1,
