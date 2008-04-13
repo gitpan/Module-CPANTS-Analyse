@@ -18,7 +18,7 @@ WriteMakefile
                            'Module::Pluggable' => '2.96',
                            'Pod::Simple::Checker' => '2.02',
                            'Readonly' => '0',
-                           'Software::License' => '0.002',
+                           'Software::License' => '0.003',
                            'Test::Deep' => '0',
                            'Test::NoWarnings' => '0',
                            'Test::Warn' => '0',
