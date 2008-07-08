@@ -12,7 +12,14 @@ use IO::Capture::Stdout;
 use IO::Capture::Stderr;
 use YAML::Syck qw(LoadFile);
 
-use version; our $VERSION=version->new('0.81');
+use version; our $VERSION=version->new('0.82');
+
+# setup logger
+if (! main->can('logger')) {
+    *main::logger = sub {
+        print "## $_[0]\n" if $main::logging;
+    };
+}
 
 use Module::Pluggable search_path=>['Module::CPANTS::Kwalitee'];
 
@@ -26,6 +33,9 @@ sub new {
     $opts->{d}={};
     $opts->{opts} ||= {};
     my $me=bless $opts,$class;
+    $main::logging = 1 if $me->opts->{verbose};
+    Carp::croak("need a dist") if not defined $opts->{dist};
+    main::logger("distro: $opts->{dist}");
 
     $me->mck(Module::CPANTS::Kwalitee->new);
     
@@ -90,7 +100,7 @@ sub analyse {
     my $me=shift;
 
     foreach my $mod (@{$me->mck->generators}) {
-        print "analyse $mod\n" if $me->opts->{verbose};
+        main::logger("analyse $mod");
         $mod->analyse($me);
     }
 }
@@ -103,15 +113,14 @@ sub calc_kwalitee {
     foreach my $mod (@{$me->mck->generators}) {
         foreach my $i (@{$mod->kwalitee_indicators}) {
             next if $i->{needs_db};
-            print $i->{name}."\n" if $me->opts->{verbose};
+            main::logger($i->{name});
             my $rv=$i->{code}($me->d, $i);
             $me->d->{kwalitee}{$i->{name}}=$rv;
             $kwalitee+=$rv;
         }
     }
     $me->d->{'kwalitee'}{'kwalitee'}=$kwalitee;
-    print "done\n" if $me->opts->{verbose};
-    
+    main::logger("done");
 }
 
 #----------------------------------------------------------------

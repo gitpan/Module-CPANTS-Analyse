@@ -2,6 +2,16 @@
 # Changes for Module::CPANTS::Analyse
 #-----------------------------------------------------------------
 
+
+0.82	2008-07-08 10:23:30
+    - update META.yml spec to 1.4
+    - fixed experimental metrics
+    - use Moose now counts for using strict
+    - lots of commits from Gabor
+    - honor META.yml key 'no_index'. Fixes RT#32777 and an IRC
+      complaint by BinGOs
+
+
 0.81   Sun Apr 13 16:45:29 CEST 2008
     - fixed doc bug in SYNOPSIS (reported by ADAMOWSKI as RT#34773)
     - made FindModules smarter (domm):

@@ -3,6 +3,7 @@ use warnings;
 use strict;
 use File::Spec::Functions qw(catfile);
 use Module::ExtractUse;
+use Data::Dumper;
 
 sub order { 100 }
 
@@ -18,6 +19,7 @@ sub analyse {
     my $modules=$me->d->{modules};
     my $files=$me->d->{files_array};
     my @tests=grep {m|^x?t\b.*\.t|} @$files;
+    $me->d->{test_files} = \@tests;
 
     my %skip=map {$_->{module}=>1 } @$modules;
     my %uses;
@@ -30,6 +32,7 @@ sub analyse {
 
     while (my ($mod,$cnt)=each%{$p->used}) {
         next if $skip{$mod};
+        next if $mod =~ /::$/;  # see RT#35092
         $uses{$mod}={
             module=>$mod,
             in_code=>$cnt,
@@ -77,8 +80,13 @@ sub kwalitee_indicators {
                 return 0 unless $modules && $uses;
                 
                 my ($strict)=$uses->{'strict'};
+                my ($moose)=$uses->{'Moose'};
                 return 0 unless $strict;
-                return 1 if $strict->{in_code} >= @$modules;
+                my $total = $strict->{in_code};
+                if ($moose) {
+                    $total += $moose->{in_code};
+                }
+                return 1 if $total >= @$modules;
                 return 0;
             },
         },
@@ -86,12 +94,11 @@ sub kwalitee_indicators {
             name=>'use_warnings',
             error=>q{This distribution does not 'use warnings;' in all of its modules.},
             is_extra=>1,
-            remedy=>q{Add 'use warnings' to all modules.},
+            remedy=>q{Add 'use warnings' to all modules. (This will require perl > 5.6)},
             code=>sub {
                 my $d=shift;
                 my $modules=$d->{modules};
                 my $uses=$d->{uses};
-                use Data::Dumper;
                 return 0 unless $modules && $uses;
                 my ($warnings)=$uses->{'warnings'};
                 return 0 unless $warnings;
@@ -117,6 +124,24 @@ sub kwalitee_indicators {
             code=>sub {
                 my $d=shift;
                 return 1 if $d->{uses}->{'Test::Pod::Coverage'};
+                return 0;
+            },
+        },
+        {
+            name=>'uses_test_nowarnings',
+            error=>q{Doesn't use Test::NoWarnings in all the test files},
+            remedy=>q{Add Test::NoWarnings to each one of the .t files and increment the test count by 1.},
+            is_experimental=>1,
+            code=>sub {
+                my $d=shift;
+                my $tests=$d->{test_files};
+                my @public_test_files = grep {/^t/} @$tests;
+                my $uses=$d->{uses};
+                return 0 unless $tests && $uses;
+                
+                my ($test_no_warnings)=$uses->{'Test::NoWarnings'};
+                return 0 unless $test_no_warnings;
+                return 1 if $test_no_warnings->{in_tests} >= @public_test_files;
                 return 0;
             },
         },
@@ -164,6 +189,8 @@ Returns the Kwalitee Indicators datastructure.
 =item * has_test_pod
 
 =item * has_test_pod_coverage
+
+=item * uses_test_nowarnings
 
 =back
 

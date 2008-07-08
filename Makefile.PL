@@ -22,7 +22,8 @@ WriteMakefile
                            'Test::Deep' => '0',
                            'Test::NoWarnings' => '0',
                            'Test::Warn' => '0',
-                           'Test::YAML::Meta::Version' => '0.06',
+                           'Test::YAML::Meta::Version' => '0.11',
+                           'Text::CSV_XS' => '0.45',
                            'YAML::Syck' => '0.95',
                            'version' => '0.73'
                          },

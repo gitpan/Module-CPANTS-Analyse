@@ -1,17 +1,20 @@
 use Test::More;
 use Test::Deep;
+use Test::NoWarnings;
 
 use Module::CPANTS::Kwalitee;
 
-my $METRICS = 43;
-my $OPTIONAL = 18;
+my $CORE = 25;
+my $OPTIONAL = 7;
+my $EXTRA = 16;
+my $METRICS = $CORE + $OPTIONAL + $EXTRA;
 
-plan tests => 7 + 2 * $METRICS;
+plan tests => 8 + 2 * $METRICS;
 
 my $k=Module::CPANTS::Kwalitee->new({});
 
-is($k->available_kwalitee, $METRICS-$OPTIONAL, 'available kwalitee');
-is($k->total_kwalitee, $METRICS, 'total kwalitee');
+is($k->available_kwalitee, $CORE, 'available kwalitee');
+is($k->total_kwalitee, $CORE + $OPTIONAL, 'total kwalitee');
 
 
 my $ind=$k->get_indicators_hash;
@@ -25,7 +28,7 @@ is(ref($ind->{use_strict}),'HASH','hash element');
 
 {
     my @all=$k->core_indicator_names;
-    is(@all, $METRICS-$OPTIONAL, 'number of core indicators');
+    is(@all, $CORE, 'number of core indicators');
 }
 
 {

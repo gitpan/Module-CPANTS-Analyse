@@ -1,13 +1,19 @@
-use Test::More tests => 7;
+use Test::More tests => 9;
 use Test::Deep;
+use Test::NoWarnings;
 
 use Module::CPANTS::Analyse;
 
-my $a=Module::CPANTS::Analyse->new({});
+eval {
+    my $an=Module::CPANTS::Analyse->new();
+};
+like($@, qr/need a dist/, 'exception');
+
+my $a=Module::CPANTS::Analyse->new({dist => 'dummy'});
 
 {
 	my @plugins=$a->plugins;
-	is(@plugins,14,'number of plugins');
+	is(@plugins,15,'number of plugins');
 }
 
 
@@ -29,6 +35,7 @@ cmp_deeply($plugins,bag(
             Module::CPANTS::Kwalitee::NeedsCompiler
             Module::CPANTS::Kwalitee::Repackageable
             Module::CPANTS::Kwalitee::Version
+            Module::CPANTS::Kwalitee::Distros
         )),'plugin the rest');
 
 

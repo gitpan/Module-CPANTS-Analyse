@@ -16,33 +16,38 @@ sub analyse {
     my $class=shift;
     my $me=shift;
 
+    main::logger(__PACKAGE__ . "::analyse called");
     # check META.yml
     my $yaml=$me->d->{meta_yml};
+    $me->d->{license} = '';
     if ($yaml) {
         if ($yaml->{license} and $yaml->{license} ne 'unknown') {
-            $me->d->{license} = $yaml->{license};
-            return;
+            $me->d->{license_from_yaml} = $yaml->{license};
+            $me->d->{license} = $yaml->{license}.' defined in META.yaml';
         }
     }
     my $files=$me->d->{files_array};
 
     # check if there's a LICEN[CS]E file
     if (my ($file) = grep {/^LICEN[CS]E$/} @$files) {
-        $me->d->{license}="defined in ./LICEN[CS]E";
+        $me->d->{license} .= " defined in $file";
         $me->d->{external_license_file}=$file;
         #$me->d->{license_from_external_license_file} = Software::LicenseUtils->licens_text(slurp());
-        return;
     }
 
     # check pod
+    #if ( $me->d->{licenses} ) {
+    #    $me->d->{license_in_pod} = 1;
+    #    $me->d->{license} .= " defined in POD";
+    #}
     foreach my $file (grep { /\.p(m|od)$/ } @$files ) {
         my $parser=Pod::Simple::TextContent->new;
         my $out;
         $parser->output_string($out);
         $parser->parse_file( catfile($me->distdir,$file) );
         if ($out=~/LICEN[CS]E/) {
+            $me->d->{license_in_pod} = 1;
             $me->d->{license}="defined in POD ($file)";
-            return;
         }
     }
     
@@ -63,13 +68,15 @@ sub kwalitee_indicators{
             name=>'has_humanreadable_license',
             error=>q{This distribution does not have a license defined in the documentation or in a file called LICENSE},
             remedy=>q{Add a section called 'LICENSE' to the documentation, or add a file named LICENSE to the distribution.},
-            code=>sub { shift->{license} ? 1 : 0 }
+            code=>sub {
+                my $d = shift;
+                return $d->{external_license_file} || $d->{license_in_pod} ? 1 : 0;
+            }
         },
         {
             name=>'has_separate_license_file',
             error=>q{This distribution does not have a LICENSE or LICENCE file in its root directory.},
             remedy=>q{This is not a critical issue. Currently mainly informative for the CPANTS authors. It might be removed later.},
-            is_extra=>1,
             is_experimental=>1,
             code=>sub { shift->{external_license_file} ? 1 : 0 }
         },
@@ -77,7 +84,6 @@ sub kwalitee_indicators{
 #            name=>'has_known_license_in_external_license_file',
 #            error=>q{This distribution has a LICENSE or LICENCE file in its root directory but the license in it was not recognized by CPANTS.},
 #            remedy=>q{Either CPANTS needs to be fixed or your LICENSE file.},
-#            is_extra=>1,
 #            is_experimental=>1,
 #            code=>sub { 
 #                my $d = shift;
@@ -89,15 +95,15 @@ sub kwalitee_indicators{
             name=>'has_license_in_source_file',
             error=>q{Does not have license information in any of its source files},
             remedy=>q{Add =head1 LICENSE and the text of the license to the main module in your code.},
-            is_extra=>1,
             is_experimental=>1,
             code=>sub {
                 my $d = shift;
                 # data collected in File.pm
+                
                 return 0 if not $d->{licenses};
                 return 1 if $d->{license_type};
                 $d->{error}{has_license_in_source_file} = "Seemingly conflicting licenses in files: "
-                    . join ", ", map {"$_ : $->{licenses}{$_}"} keys %{ $d->{licenses} };
+                    . join ", ", map {"$_ : $d->{licenses}{$_}"} keys %{ $d->{licenses} };
                 return 0;
             }
         },
@@ -105,7 +111,6 @@ sub kwalitee_indicators{
             name=>'fits_fedora_license',
             error=>qq{Fits the licensing requirements of Fedora ($fedora_licenses).},
             remedy=>q{Replace the license or convince Fedora to accept this license as well.},
-            is_extra=>1,
             is_experimental=>1,
             code=>sub { 
                 my $d=shift;

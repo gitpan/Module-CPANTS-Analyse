@@ -46,6 +46,7 @@ sub analyse {
             }
         }
     }
+
     if (%licenses) {
         $me->d->{licenses} = \%licenses;
         if (keys %licenses == 1) {
@@ -57,9 +58,6 @@ sub analyse {
 
     #die Dumper \%files;
     $me->d->{size_unpacked}=$size;
-
-    $me->d->{files}=\%files;
-    $me->d->{dirs}=\@dirs;
 
     # find symlinks
     my @symlinks;
@@ -292,7 +290,6 @@ sub kwalitee_indicators {
         name=>'no_large_files',
         error=>qq{This distribution has at least one file larger than $large_file bytes)},
         remedy=>q{No remedy for that.},
-        is_extra=>1,
         is_experimental=>1,
         code=>sub {
             my $d=shift;

@@ -7,7 +7,7 @@ use Test::YAML::Meta::Version;
 
 sub order { 20 }
 
-my $CURRENT_SPEC = '1.3';
+my $CURRENT_SPEC = '1.4';
 
 ##################################################################
 # Analyse
@@ -29,8 +29,42 @@ sub analyse {
         };
         if ($@) {
             $me->d->{error}{metayml_is_parsable}=$@;
+            return;
         }
-    }    
+    }
+
+    if (my $no_index = $me->d->{meta_yml}->{no_index}) {
+        my @ignore;
+        foreach my $type (qw(file directory)) {
+            next unless $no_index->{$type};
+            foreach (@{$no_index->{$type}}) {
+                next if /^x?t/; # won't ignore t, xt
+                next if /^lib/; # and lib
+                push(@ignore,$_);
+            }
+        }
+        $me->d->{no_index}=join(';',@ignore);
+        my @old=@{$me->d->{files_array}};
+        my @new; my @ignored;
+        foreach my $file (@old) {
+            
+            # me wants smart match!!!!
+
+            if (grep { $file=~/^$_/ } @ignore) {
+                delete $me->d->{files_hash}{$file};
+                $me->d->{files}--;
+                push(@ignored,$file);
+            }
+            else {
+                push(@new,$file);
+            }
+        }
+        $me->d->{files_array}=\@new;
+        $me->d->{files_list}=join(';',@new);
+        $me->d->{ignored_files_array}=\@ignored;
+        $me->d->{ignored_files_list}=join(';',@ignored);
+    }
+
 }
 
 ##################################################################
@@ -87,7 +121,6 @@ sub kwalitee_indicators{
         {
             name=>'metayml_declares_perl_version',
             error=>q{This distribution does not declare the minimum perl version in META.yml.},
-            is_extra=>1,
             is_experimental=>1,
             remedy=>q{If you are using Build.PL define the {requires}{perl} = VERSION field. If you are using MakeMaker (Makefile.PL) you should upgrade ExtUtils::MakeMaker to a future version.},
             code=>sub { 
