@@ -18,6 +18,8 @@ sub analyse {
     my $class=shift;
     my $me=shift;
 
+	return if $ENV{CPANTS_LINT};
+
     if (not $debian) {
         $debian = get_debian_data();
     }
@@ -72,6 +74,8 @@ sub get_debian_data {
 ##################################################################
 
 sub kwalitee_indicators{
+	return [] if $ENV{CPANTS_LINT};
+
     return [
          {
             name=>'distributed_by_debian',
@@ -138,8 +142,10 @@ team to upgrde.},
                     my $deb = $debian->{ $d->{dist} };
                     return 1 if $deb && !$deb->{N_patches};
                     if ($deb) {
-                        my $error = "Number of patches reported: $deb->{N_patches}.";
-                        $error .= " See: <a href=http://packages.debian.org/src:$deb->{debian_pkg}>Basic homepage</a>";
+                        my $error = qq(Number of patches reported: $deb->{N_patches}.);
+                        $error .= qq( See: <a href="http://packages.debian.org/src:$deb->{debian_pkg}">Basic homepage</a>);
+                        $error .= sprintf(' <a href="http://svn.debian.org/wsvn/pkg-perl/trunk/%s/debian/patches/">svn</a>',
+                                $deb->{debian_pkg});
                         $d->{error}{ $metric->{name} } = $error;
                     } else {
                         #$d->{error}{ $metric->{name} } = 'First get your module in Debian';
@@ -241,7 +247,10 @@ Thomas Klausner, <domm@cpan.org>, http://domm.zsi.at
 and Gabor Szabo, <gabor@pti.co.il>, http://www.szabgab.com
 with the help of Martín Ferrari and the Debian Perl packaging team.
 
-=head1 COPYRIGHT
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2003-2009  Thomas Klausner
+Copyright (C) 2006-2008  Gabor Szabo
 
 You may use and distribute this module according to the same terms
 that Perl is distributed under.
