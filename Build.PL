@@ -23,12 +23,23 @@ my $build = Module::Build->new(
         'Software::License'         => '0.003',
         'File::Slurp'               => '0',
         'Text::CSV_XS'              => '0.45',
+        'LWP::Simple'               => 0,
+        'perl'                      => 5.006,
     },
     build_requires => {
+        'Test::More'                => '0',
         'Test::Deep'                => '0',
-        'Test::Warn'                => '0',
+        'Test::Warn'                => '0.11', #less problems with new Sub::Uplevel
         'Test::NoWarnings'          => '0',
-    }, 
+    },
+    meta_merge => {
+        resources => {
+            repository => 'http://github.com/domm/CPANTS/tree',
+        },
+        keywords => [
+            'CPANTS','kwalitee',
+        ],
+    },
     script_files=>[qw(bin/cpants_lint.pl)],
     create_makefile_pl=>'traditional',
 );

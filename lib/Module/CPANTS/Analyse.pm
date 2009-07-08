@@ -1,4 +1,5 @@
 package Module::CPANTS::Analyse;
+use 5.006;
 use strict;
 use warnings;
 use base qw(Class::Accessor);
@@ -12,7 +13,7 @@ use IO::Capture::Stdout;
 use IO::Capture::Stderr;
 use YAML::Syck qw(LoadFile);
 
-use version; our $VERSION=version->new('0.83');
+use version; our $VERSION=version->new('0.84');
 
 # setup logger
 if (! main->can('logger')) {
@@ -163,7 +164,7 @@ __END__
 Module::CPANTS::Analyse - Generate Kwalitee ratings for a distribution
 
 =head1 SYNOPSIS
-    
+
     use Module::CPANTS::Analyse;
 
     my $analyser=Module::CPANTS::Analyse->new({
@@ -173,7 +174,7 @@ Module::CPANTS::Analyse - Generate Kwalitee ratings for a distribution
     $analyser->analyse;
     $analyser->calc_kwalitee;
     # results are in $analyser->d;
-  
+
 =head1 DESCRIPTION
 
 =head2 Methods

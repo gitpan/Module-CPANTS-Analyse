@@ -1,6 +1,6 @@
 ---
 name: Module-CPANTS-Analyse
-version: 0.83
+version: 0.84
 author:
   - 'Thomas Klausner, <domm@cpan.org>, http://domm.zsi.at'
   - |-
@@ -10,6 +10,7 @@ abstract: Generate Kwalitee ratings for a distribution
 license: perl
 resources:
   license: http://dev.perl.org/licenses/
+  repository: http://github.com/domm/CPANTS/tree
 requires:
   Archive::Any: 0.06
   Archive::Tar: 1.30
@@ -19,6 +20,7 @@ requires:
   File::Find::Rule: 0
   File::Slurp: 0
   IO::Capture: 0.05
+  LWP::Simple: 0
   List::MoreUtils: 0
   Module::ExtractUse: 0.18
   Module::Pluggable: 2.96
@@ -28,15 +30,17 @@ requires:
   Test::YAML::Meta::Version: 0.11
   Text::CSV_XS: 0.45
   YAML::Syck: 0.95
+  perl: 5.006
   version: 0.73
 build_requires:
   Test::Deep: 0
+  Test::More: 0
   Test::NoWarnings: 0
-  Test::Warn: 0
+  Test::Warn: 0.11
 provides:
   Module::CPANTS::Analyse:
     file: lib/Module/CPANTS/Analyse.pm
-    version: 0.83
+    version: 0.84
   Module::CPANTS::Kwalitee:
     file: lib/Module/CPANTS/Kwalitee.pm
   Module::CPANTS::Kwalitee::BrokenInstaller:
@@ -73,3 +77,6 @@ generated_by: Module::Build version 0.33
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
+keywords:
+  - CPANTS
+  - kwalitee
