@@ -3,6 +3,7 @@ use warnings;
 use strict;
 use File::Spec::Functions qw(catfile);
 use Module::ExtractUse;
+use Set::Scalar qw();
 use Data::Dumper;
 
 sub order { 100 }
@@ -23,7 +24,13 @@ sub analyse {
 
     my %skip=map {$_->{module}=>1 } @$modules;
     my %uses;
-    
+
+    foreach (@$modules) {
+        my $p = Module::ExtractUse->new;
+        $p->extract_use(catfile($distdir,$_->{file}));
+        $_->{uses} = $p->used;
+    }
+
     # used in modules
     my $p=Module::ExtractUse->new;
     foreach (@$modules) {
@@ -74,20 +81,43 @@ sub kwalitee_indicators {
             error=>q{This distribution does not 'use strict;' in all of its modules.},
             remedy=>q{Add 'use strict' to all modules.},
             code=>sub {
-                my $d=shift;
-                my $modules=$d->{modules};
-                my $uses=$d->{uses};
+                my $d       = shift;
+                my $modules = $d->{modules};
+                my $uses    = $d->{uses};
                 return 0 unless $modules && $uses;
-                
-                my ($strict)=$uses->{'strict'};
-                my ($moose)=$uses->{'Moose'};
-                return 0 unless $strict;
-                my $total = $strict->{in_code};
-                if ($moose) {
-                    $total += $moose->{in_code};
+
+                # There are lots of acceptable strict alternatives
+                my $strict_equivalents = Set::Scalar->new->insert(qw(
+                    strict
+                    Any::Moose
+                    Class::Spiffy
+                    Coat
+                    common::sense
+                    Dancer
+                    Mo
+                    Modern::Perl
+                    Mojo::Base
+                    Moo
+                    Moose
+                    Moose::Role
+                    MooseX::Declare
+                    MooseX::Types
+                    Mouse
+                    Mouse::Role
+                    perl5
+                    perl5i::1
+                    perl5i::2
+                    perl5i::latest
+                    Spiffy
+                    strictures
+                ));
+
+                for my $module (@{ $modules }) {
+                    return 0 if $strict_equivalents
+                        ->intersection(Set::Scalar->new(keys %{ $module->{uses} }))
+                        ->is_empty;
                 }
-                return 1 if $total >= @$modules;
-                return 0;
+                return 1;
             },
         },
         {
@@ -96,14 +126,42 @@ sub kwalitee_indicators {
             is_extra=>1,
             remedy=>q{Add 'use warnings' to all modules. (This will require perl > 5.6)},
             code=>sub {
-                my $d=shift;
-                my $modules=$d->{modules};
-                my $uses=$d->{uses};
+                my $d       = shift;
+                my $modules = $d->{modules};
+                my $uses    = $d->{uses};
                 return 0 unless $modules && $uses;
-                my ($warnings)=$uses->{'warnings'};
-                return 0 unless $warnings;
-                return 1 if $warnings->{in_code} >= @$modules;
-                return 0;
+
+                my $warnings_equivalents = Set::Scalar->new->insert(qw(
+                    warnings
+                    Any::Moose
+                    Class::Spiffy
+                    Coat
+                    common::sense
+                    Dancer
+                    Mo
+                    Modern::Perl
+                    Mojo::Base
+                    Moo
+                    Moose
+                    Moose::Role
+                    MooseX::Declare
+                    MooseX::Types
+                    Mouse
+                    Mouse::Role
+                    perl5
+                    perl5i::1
+                    perl5i::2
+                    perl5i::latest
+                    Spiffy
+                    strictures
+                ));
+
+                for my $module (@{ $modules }) {
+                    return 0 if $warnings_equivalents
+                        ->intersection(Set::Scalar->new(keys %{ $module->{uses} }))
+                        ->is_empty;
+                }
+                return 1;
             },
         },
         
@@ -156,7 +214,7 @@ q{Favourite record of the moment:
 
 __END__
 
-=pod
+=encoding UTF-8
 
 =head1 NAME
 
@@ -202,14 +260,11 @@ L<Module::CPANTS::Analyse>
 
 =head1 AUTHOR
 
-Thomas Klausner, <domm@cpan.org>, http://domm.zsi.at
+L<Thomas Klausner|https://metacpan.org/author/domm>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2003-2006, 2009  Thomas Klausner
+Copyright © 2003–2006, 2009 L<Thomas Klausner|https://metacpan.org/author/domm>
 
 You may use and distribute this module according to the same terms
 that Perl is distributed under.
-
-=cut
-

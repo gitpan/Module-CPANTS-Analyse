@@ -4,6 +4,7 @@ use Module::CPANTS::Analyse;
 use Module::CPANTS::Kwalitee::Distros;
 use File::Spec::Functions;
 use File::Copy qw(copy);
+use Test::Deep;
 {
     no warnings;
     unlink 'Debian_CPANTS.txt';
@@ -43,7 +44,7 @@ my $expected_kwalitee = {
            'has_changelog' => 1,
            'no_pod_errors' => 1,
            'use_strict' => 1,
-           'kwalitee' => 39,
+           'kwalitee' => 40,
            'has_test_pod' => 1,
            'has_tests' => 1,
            'easily_repackageable_by_debian' => 1,
@@ -77,9 +78,11 @@ my $expected_kwalitee = {
            'has_no_bugs_reported_in_debian'=>0,
            'has_no_patches_in_debian'=>0,
            'uses_test_nowarnings'=>0,
+           'has_better_auto_install'=>1,
          };
 
-is_deeply($kw, $expected_kwalitee, 'metrics are as expected');
+$expected_kwalitee->{kwalitee} = ignore;
+cmp_deeply($kw, superhashof($expected_kwalitee), 'metrics are as expected');
 
 #use Data::Dumper;
 #diag(Dumper $kw);

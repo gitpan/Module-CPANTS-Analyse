@@ -4,9 +4,9 @@ use Test::NoWarnings;
 
 use Module::CPANTS::Kwalitee;
 
-my $CORE = 23;
-my $OPTIONAL = 9;
-my $EXTRA = 16;
+my $CORE = 25;
+my $OPTIONAL = 10; #is_extra set
+my $EXTRA = 15; #experimental?
 my $METRICS = $CORE + $OPTIONAL + $EXTRA;
 
 plan tests => 8 + 2 * $METRICS;
@@ -50,6 +50,3 @@ foreach my $mod (@{$k->generators}) {
         # $kwalitee+=$rv;
     }
 }
-
-=cut
-

@@ -2,8 +2,8 @@ package Module::CPANTS::Kwalitee::MetaYML;
 use warnings;
 use strict;
 use File::Spec::Functions qw(catfile);
-use YAML::Syck qw(Load LoadFile);
-use Test::YAML::Meta::Version;
+use YAML::Any qw(Load LoadFile);
+use Test::CPAN::Meta::YAML::Version;
 
 sub order { 20 }
 
@@ -121,12 +121,12 @@ sub kwalitee_indicators{
         {
             name=>'metayml_declares_perl_version',
             error=>q{This distribution does not declare the minimum perl version in META.yml.},
-            is_experimental=>1,
-            remedy=>q{If you are using Build.PL define the {requires}{perl} = VERSION field. If you are using MakeMaker (Makefile.PL) you should upgrade ExtUtils::MakeMaker to a future version.},
+            is_extra=>1,
+            remedy=>q{If you are using Build.PL define the {requires}{perl} = VERSION field. If you are using MakeMaker (Makefile.PL) you should upgrade ExtUtils::MakeMaker to 6.48 and use MIN_PERL_VERSION parameter. Perl::MinimumVersion can help you determine which version of Perl your module needs.},
             code=>sub { 
                 my $d=shift;
                 my $yaml=$d->{meta_yml};
-                return $yaml->{requires}{perl} ? 1 : 0;
+                return ref $yaml->{requires} eq ref {} && $yaml->{requires}{perl} ? 1 : 0;
             },
         },
     ];
@@ -149,7 +149,7 @@ sub check_spec_conformance {
         }
     }
     $hash{spec} = $version;
-    my $spec = Test::YAML::Meta::Version->new(%hash);
+    my $spec = Test::CPAN::Meta::YAML::Version->new(%hash);
     if ($spec->parse()) {
         my $report_version= $version || 'known';
         my @errors;
@@ -171,7 +171,7 @@ q{Barbies Favourite record of the moment:
 
 __END__
 
-=pod
+=encoding UTF-8
 
 =head1 NAME
 
@@ -219,7 +219,7 @@ Returns the Kwalitee Indicators datastructure.
 
     check_spec_conformance($d,$version);
 
-Validates META.yml using Test::YAML::Meta.
+Validates META.yml using Test::CPAN::Meta.
 
 =head1 SEE ALSO
 
@@ -227,15 +227,14 @@ L<Module::CPANTS::Analyse>
 
 =head1 AUTHOR
 
-Thomas Klausner, <domm@cpan.org>, http://domm.zsi.at
-and Gabor Szabo, <gabor@pti.co.il>, http://www.szabgab.com
+L<Thomas Klausner|https://metacpan.org/author/domm>
+and L<Gábor Szabó|https://metacpan.org/author/szabgab>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2003-2009  Thomas Klausner
-Copyright (C) 2006-2008  Gabor Szabo
+Copyright © 2003–2009 L<Thomas Klausner|https://metacpan.org/author/domm>
+
+Copyright © 2006–2008 L<Gábor Szabó|https://metacpan.org/author/szabgab>
 
 You may use and distribute this module according to the same terms
 that Perl is distributed under.
-
-=cut

@@ -1,0 +1,100 @@
+This file contains message digests of all files listed in MANIFEST,
+signed via the Module::Signature module, version 0.68.
+
+To verify the content in this distribution, first make sure you have
+Module::Signature installed, then type:
+
+    % cpansign -v
+
+It will check each file's integrity, as well as the signature's
+validity.  If "==> Signature verified OK! <==" is not displayed,
+the distribution may already have been compromised, and you should
+not run its Makefile.PL or Build.PL.
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+SHA1 834a20cd15f245f11fec2d7718b7e3f27726bd1c AUTHORS
+SHA1 ab19286cf4ba03772ae4d0a6f6c3d9ff059c5104 Build.PL
+SHA1 15ec9a648bf072484c1391e3e8f34e9aa9db701d Changes
+SHA1 3d3d5c5c481505b713e987a3bff48bc64ded721e MANIFEST
+SHA1 cfe71ceea03cd30b7a1ef7f04efbb19acb92abc9 MANIFEST.SKIP
+SHA1 e50827b31f8cb12b0d9dda08c000ca696ef4d073 META.json
+SHA1 77f510d692e76a9914c18f12c0bd222e2322a802 META.yml
+SHA1 f596d65d50d1e6f7f9e24b2faa88169e7004b092 Makefile.PL
+SHA1 a19fcf62d2da0a5d81a7def869f16812ccd2b2ad README
+SHA1 3280a57905d52489059aed328cfe36997089694c TODO
+SHA1 dc9cfd5bcc7aa5d5e1a8635cba54369e1a7e8265 bin/cpants_lint.pl
+SHA1 b46ab417201a0485e855b4750ef6b6cef57a28e4 lib/Module/CPANTS/Analyse.pm
+SHA1 8f1f6911f83cc179a9e8a302d0d824cd50f96b67 lib/Module/CPANTS/Kwalitee.pm
+SHA1 a312d2f3f3112a17020d170fd440bfdd024a4fff lib/Module/CPANTS/Kwalitee/BrokenInstaller.pm
+SHA1 8981c0563de2f9e07ac0dec15c7e09d943539ded lib/Module/CPANTS/Kwalitee/CpantsErrors.pm
+SHA1 eaf62c3cff5423c872c7eec877b7bc5e93fcde03 lib/Module/CPANTS/Kwalitee/Distname.pm
+SHA1 9d2a90cf8846d5655515f8f01b0b8d92da893726 lib/Module/CPANTS/Kwalitee/Distros.pm
+SHA1 dd607adafe8903ffb2b1f398f41119956624d13e lib/Module/CPANTS/Kwalitee/Files.pm
+SHA1 43c27bcb1ef903bb856910cef651ebd455deb8d3 lib/Module/CPANTS/Kwalitee/FindModules.pm
+SHA1 7cf8819a7c88893ff104c5630e7d4495b7abafbf lib/Module/CPANTS/Kwalitee/License.pm
+SHA1 d4fd341dd2f8170a301ce395ebd63a1ddfab107b lib/Module/CPANTS/Kwalitee/Manifest.pm
+SHA1 70e8ea462f083a6b5705e8f4f4accc8afc7c8e34 lib/Module/CPANTS/Kwalitee/MetaYML.pm
+SHA1 9fb22c45fbf5efeb49f35f98b4e56a91ce381162 lib/Module/CPANTS/Kwalitee/NeedsCompiler.pm
+SHA1 75f60e843b74b7eea3aace7f5c74c6fb5054468b lib/Module/CPANTS/Kwalitee/Pod.pm
+SHA1 0f32a42e1bd2dc8bd08f167a7588fd9ac9b95232 lib/Module/CPANTS/Kwalitee/Prereq.pm
+SHA1 729f3ce1c161098f253cfd9826ce441016f2ddd3 lib/Module/CPANTS/Kwalitee/Repackageable.pm
+SHA1 2d506b6f99b3bb6d68fa15cbda61a489c59bd202 lib/Module/CPANTS/Kwalitee/Signature.pm
+SHA1 7d8feb8edfb473fbe000c477b069ebc243576b9c lib/Module/CPANTS/Kwalitee/Uses.pm
+SHA1 984d241e092feb928aba4fa859319dbe1ad6b610 lib/Module/CPANTS/Kwalitee/Version.pm
+SHA1 f5da9dd3db114e668f0d1de7c0e59f703d603050 t/00_load.t
+SHA1 59c9115f5109e8520676961c7471d28f8bade035 t/02_kwalitee.t
+SHA1 982789ab0449f6abbab53a62b9187ab0cee8b78c t/03_plugins.t
+SHA1 db01ed634fd833f042daf490377398f82d45d279 t/05_testdir.t
+SHA1 d6a433a08a28e2e107c12b63c32ab42d696bf47e t/05_testfile.t
+SHA1 de57581ec8bba9f1de1f42183d557c69a2c11d04 t/10_analyse.t
+SHA1 3f01f689ea81da1ac0966f0e71cfaf0b40ed2d0b t/analyse_afs.t
+SHA1 da2c2e1e321594273acb60083398fbc2e994f1c1 t/analyse_axkit_xsp_l10n.t
+SHA1 3c7e57d83cbef477df22d9cda901e9f7b086ec06 t/analyse_devel_timer.t
+SHA1 aadd768edb0d96e8946bb418d9bf537a20b0a556 t/analyse_eg_c.t
+SHA1 a6634d0c343cf3293ffb2aca96777507103f15bf t/analyse_html_tiny.t
+SHA1 c44174ed8cb38c755ec328fb3924fa2524147271 t/analyse_test_yaml_meta.t
+SHA1 6a3935fbffb14a674e6caf2d1efc31cce4384592 t/calc.t
+SHA1 0d78f4a197e0df200c74a80d6591b154f58dc69a t/calc_test_yaml_meta.t
+SHA1 e7727ac3a683a08e49b60643563fa608247fb44b t/eg/AFS-2.4.0.tar.gz
+SHA1 ad608931f6ddf06134a82201c8c7c0d7f070204d t/eg/Acme-DonMartin-0.06.tar.gz
+SHA1 764b01dd09e8d0dabd3a25a2894f33ae511d79b8 t/eg/Acme-DonMartinOther-0.06.tar.gz
+SHA1 2fd262639b0575c4dac28feb61944cea4c25001f t/eg/App-Wack-0.05.tar.gz
+SHA1 930641d58eda319a88652c729fc82b7b953e0c9c t/eg/App-perlhl-0.002.tar.gz
+SHA1 271f7559bcf3a7905351da7360c53cfd54049b7f t/eg/AxKit-XSP-L10N-0.03.tar.gz
+SHA1 bf471ba0ba8cf5accb2c01b1da52f800017cae6e t/eg/Capture-Tiny-0.05.tar.gz
+SHA1 38b8169c4180ccb187a312dfc94eb08a9a8848e8 t/eg/DBIx-SchemaChecksum-0.06.tar.gz
+SHA1 fbb5073ce6280744ccbb3b5845857f3ec62da67f t/eg/Debian_CPANTS.txt
+SHA1 8ccc091094e55ff2f10a83d7affeca134eddfd63 t/eg/Devel-Timer-0.02.tar.gz
+SHA1 3645b88ac23ffe90e03829f9bf90b8330e4fb496 t/eg/Eg-C-0.01.tar.gz
+SHA1 7eb6ec18217df6bed314d031c905fe5c695ec660 t/eg/HTML-Tiny-0.904.tar.gz
+SHA1 e35648958db78462751078bf84638e9e29e05207 t/eg/PPI-HTML-1.07.tar.gz
+SHA1 05ed89310bb606a72a7e448e365e868dde47e243 t/eg/Parse-Fedora-Packages-0.02.tar.gz
+SHA1 cf82b9399eedd0099476c48f059ef8f250f96d94 t/eg/Pipe-0.03.tar.gz
+SHA1 b552f63874c2450174d40f7278c5c56cb15ed827 t/eg/Set-Object-1.28.tar.gz
+SHA1 ee7ddfae8e843f647f635e150c562de85ce5b09d t/eg/Term-Title-0.03.tar.gz
+SHA1 caa8dd78c9e0873d1cf1ef21a1cd3f2e888b5c15 t/eg/Test-YAML-Meta-0.04.tar.gz
+SHA1 1077c9b5ae8d5cce76e4360e51d1cf960e575ed1 t/eg/Text-CSV_XS-0.40.tgz
+SHA1 b558be74d06b7764cb8b4430b9ae82c45ce1ae06 t/eg/manifest/Good-Dist-0.01.tar.gz
+SHA1 9d41593f1bcef141577d08e5b76fdc2dc59ca68f t/eg/manifest/bad-manifest-0.01.tar.gz
+SHA1 9f729e066b4f4c470a2feef85133d8e200f18816 t/eg/manifest/no-manifest-0.01.tar.gz
+SHA1 ed129e5d3620412750a2850d1030e1f695d82eac t/eg/modified/DBIx-SchemaChecksum-0.06.tar.gz
+SHA1 1926c74be712c915c0e7c0f9fc1051bbe7bd5c44 t/eg/not_extractable.gz
+SHA1 8e4d1e565bc8dcc8e6ee273271eea2ea627842a5 t/generated_files.t
+SHA1 562200cc05181ea7cc5fb2e7f915e786c6607cd8 t/moose_as_strict.t
+SHA1 a7150bb02bb911fbf7caf4728002614fb2f4d38c t/perl5i_as_strict.t
+SHA1 77c517e51f2cbf0ec48269af016cad48de468e93 t/perl5i_as_warnings.t
+SHA1 492fb3e18736f5406b5cdd25e66256e3334c9281 t/plugin_manifest.t
+SHA1 d62ffc80d665e006d0eb890ebfaa3bb9dd3a3472 t/unpack.t
+SHA1 cfc23b5bca8aef83ace7204b3c6d588fa323858f t/unpack_notextractable.t
+SHA1 f732018f4fba395da9dacc46ce3331443e2d5076 xt/99_critic.t
+SHA1 0190346d7072d458c8a10a45c19f86db641dcc48 xt/99_pod.t
+SHA1 6da39b48ce64b584e4c3274bff96fc76ff484820 xt/99_pod_coverage.t
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.18 (GNU/Linux)
+
+iEYEARECAAYFAk+ExVQACgkQFtlTdOX00HqfewCglOfQRiBFnKH1DeifF2WVugjd
+ZXYAoKD7AIG2C/ctxX0Coa7/R+8nZSut
+=/NGS
+-----END PGP SIGNATURE-----

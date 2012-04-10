@@ -21,13 +21,14 @@ sub analyse {
 	return if $ENV{CPANTS_LINT};
 
     if (not $debian) {
-        $debian = get_debian_data();
+        $debian = _get_debian_data();
     }
    
     return;
 }
 
-sub get_debian_data {
+
+sub _get_debian_data {
     my $local_file = 'Debian_CPANTS.txt';
     mirror('http://pkg-perl.alioth.debian.org/CPANTS.txt', $local_file);
 
@@ -163,7 +164,7 @@ q{Favourite record of the moment:
 
 __END__
 
-=pod
+=encoding UTF-8
 
 =head1 NAME
 
@@ -245,16 +246,16 @@ L<Module::CPANTS::Analyse>
 
 =head1 AUTHOR
 
-Thomas Klausner, <domm@cpan.org>, http://domm.zsi.at
-and Gabor Szabo, <gabor@pti.co.il>, http://www.szabgab.com
-with the help of Martín Ferrari and the Debian Perl packaging team.
+L<Thomas Klausner|https://metacpan.org/author/domm>
+and L<Gábor Szabó|https://metacpan.org/author/szabgab>
+with the help of Martín Ferrari and the
+L<Debian Perl packaging team|http://pkg-perl.alioth.debian.org/>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2003-2009  Thomas Klausner
-Copyright (C) 2006-2008  Gabor Szabo
+Copyright © 2003–2009 L<Thomas Klausner|https://metacpan.org/author/domm>
+
+Copyright © 2006–2008 L<Gábor Szabó|https://metacpan.org/author/szabgab>
 
 You may use and distribute this module according to the same terms
 that Perl is distributed under.
-
-=cut

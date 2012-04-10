@@ -5,7 +5,7 @@ use Module::CPANTS::Analyse;
 use Getopt::Long;
 use IO::Capture::Stdout;
 use Data::Dumper;
-use YAML::Syck;
+use YAML::Any;
 use File::Spec::Functions;
 use Cwd;
 use Pod::Usage;
@@ -133,6 +133,8 @@ if ($opts{to_file}) {
 
 __END__
 
+=encoding UTF-8
+
 =head1 NAME
 
 cpants_lint.pl - commandline frontend to Module::CPANTS::Analyse
@@ -207,15 +209,11 @@ Directory to dump files to. Defaults to the current working directory.
 
 =head1 AUTHOR
 
-Thomas Klausner, <domm@cpan.org>, http://domm.zsi.at
+L<Thomas Klausner|https://metacpan.org/author/domm>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2003-2006, 2009  Thomas Klausner
+Copyright © 2003–2006, 2009 L<Thomas Klausner|https://metacpan.org/author/domm>
 
 You may use and distribute this module according to the same terms
 that Perl is distributed under.
-
-=cut
-
-
