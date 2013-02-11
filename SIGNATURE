@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.68.
+signed via the Module::Signature module, version 0.70.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -12,45 +12,45 @@ the distribution may already have been compromised, and you should
 not run its Makefile.PL or Build.PL.
 
 -----BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA1
+Hash: SHA512
 
 SHA1 834a20cd15f245f11fec2d7718b7e3f27726bd1c AUTHORS
-SHA1 ab19286cf4ba03772ae4d0a6f6c3d9ff059c5104 Build.PL
-SHA1 15ec9a648bf072484c1391e3e8f34e9aa9db701d Changes
-SHA1 3d3d5c5c481505b713e987a3bff48bc64ded721e MANIFEST
+SHA1 52cd088b0b12811e0d1fd826bd247f9d084d9a72 Build.PL
+SHA1 a2d7ea1a22c50a86f9623bf97ec6ed961dd9a4ba Changes
+SHA1 06e5dbbedc1b7f811bc513acc22ac858adcfc0c5 MANIFEST
 SHA1 cfe71ceea03cd30b7a1ef7f04efbb19acb92abc9 MANIFEST.SKIP
-SHA1 e50827b31f8cb12b0d9dda08c000ca696ef4d073 META.json
-SHA1 77f510d692e76a9914c18f12c0bd222e2322a802 META.yml
-SHA1 f596d65d50d1e6f7f9e24b2faa88169e7004b092 Makefile.PL
-SHA1 a19fcf62d2da0a5d81a7def869f16812ccd2b2ad README
+SHA1 384d3eeb4349ca02f6bfa66070c5960a7a354acc META.json
+SHA1 4419934d5ae08954a60244a1fd24eec84d901a94 META.yml
+SHA1 4f65c3aaf7ed6e9083e3efe2df02ac6c0cd99806 Makefile.PL
+SHA1 979c5d2190ab1ad5fffd524c1d07195c667abcc3 README
 SHA1 3280a57905d52489059aed328cfe36997089694c TODO
 SHA1 dc9cfd5bcc7aa5d5e1a8635cba54369e1a7e8265 bin/cpants_lint.pl
-SHA1 b46ab417201a0485e855b4750ef6b6cef57a28e4 lib/Module/CPANTS/Analyse.pm
-SHA1 8f1f6911f83cc179a9e8a302d0d824cd50f96b67 lib/Module/CPANTS/Kwalitee.pm
-SHA1 a312d2f3f3112a17020d170fd440bfdd024a4fff lib/Module/CPANTS/Kwalitee/BrokenInstaller.pm
-SHA1 8981c0563de2f9e07ac0dec15c7e09d943539ded lib/Module/CPANTS/Kwalitee/CpantsErrors.pm
-SHA1 eaf62c3cff5423c872c7eec877b7bc5e93fcde03 lib/Module/CPANTS/Kwalitee/Distname.pm
-SHA1 9d2a90cf8846d5655515f8f01b0b8d92da893726 lib/Module/CPANTS/Kwalitee/Distros.pm
-SHA1 dd607adafe8903ffb2b1f398f41119956624d13e lib/Module/CPANTS/Kwalitee/Files.pm
-SHA1 43c27bcb1ef903bb856910cef651ebd455deb8d3 lib/Module/CPANTS/Kwalitee/FindModules.pm
-SHA1 7cf8819a7c88893ff104c5630e7d4495b7abafbf lib/Module/CPANTS/Kwalitee/License.pm
-SHA1 d4fd341dd2f8170a301ce395ebd63a1ddfab107b lib/Module/CPANTS/Kwalitee/Manifest.pm
-SHA1 70e8ea462f083a6b5705e8f4f4accc8afc7c8e34 lib/Module/CPANTS/Kwalitee/MetaYML.pm
-SHA1 9fb22c45fbf5efeb49f35f98b4e56a91ce381162 lib/Module/CPANTS/Kwalitee/NeedsCompiler.pm
-SHA1 75f60e843b74b7eea3aace7f5c74c6fb5054468b lib/Module/CPANTS/Kwalitee/Pod.pm
-SHA1 0f32a42e1bd2dc8bd08f167a7588fd9ac9b95232 lib/Module/CPANTS/Kwalitee/Prereq.pm
-SHA1 729f3ce1c161098f253cfd9826ce441016f2ddd3 lib/Module/CPANTS/Kwalitee/Repackageable.pm
-SHA1 2d506b6f99b3bb6d68fa15cbda61a489c59bd202 lib/Module/CPANTS/Kwalitee/Signature.pm
-SHA1 7d8feb8edfb473fbe000c477b069ebc243576b9c lib/Module/CPANTS/Kwalitee/Uses.pm
-SHA1 984d241e092feb928aba4fa859319dbe1ad6b610 lib/Module/CPANTS/Kwalitee/Version.pm
+SHA1 49232250c191d6cbad546dc3513b50e6e68f3a4d lib/Module/CPANTS/Analyse.pm
+SHA1 9a7250aaab4e2169b6556b82ec1d8cc6da70e841 lib/Module/CPANTS/Kwalitee.pm
+SHA1 fb3015142755b5260dd2cddc8d76a11c02cc6300 lib/Module/CPANTS/Kwalitee/BrokenInstaller.pm
+SHA1 907bf9d9308c3838f53ab58385b97a52314e45ce lib/Module/CPANTS/Kwalitee/CpantsErrors.pm
+SHA1 06cf8f9b4a395fd9dd5a7a95d60ca2fab797f0b2 lib/Module/CPANTS/Kwalitee/Distname.pm
+SHA1 9343889456d6f32bd7cebac50ef1a3aae48c581a lib/Module/CPANTS/Kwalitee/Distros.pm
+SHA1 63625be8d2672c6f29ae583f01add702a629065b lib/Module/CPANTS/Kwalitee/Files.pm
+SHA1 73bd7054b28e931c305a64368eff52cd8bf9ff9d lib/Module/CPANTS/Kwalitee/FindModules.pm
+SHA1 15a2c343044899c99be9b2ee36423c5aa215625c lib/Module/CPANTS/Kwalitee/License.pm
+SHA1 ddd4fa6b066ed36c750c443145f26f46780009e0 lib/Module/CPANTS/Kwalitee/Manifest.pm
+SHA1 3bbe66a6739746f5b39c8a9939009b2386a2001c lib/Module/CPANTS/Kwalitee/MetaYML.pm
+SHA1 b240ae8525b7dc32525de07770465ee23534c26f lib/Module/CPANTS/Kwalitee/NeedsCompiler.pm
+SHA1 9303f9143d26e2a7a62d74c25ec4e19fbbb046cd lib/Module/CPANTS/Kwalitee/Pod.pm
+SHA1 e2614cf73f4f5641e69690f3624d1b0824bfb3f3 lib/Module/CPANTS/Kwalitee/Prereq.pm
+SHA1 e13073aad5f07b5ae7f93cae28367dd21ee76859 lib/Module/CPANTS/Kwalitee/Repackageable.pm
+SHA1 34a911d24deb46af05449287074ec68d470dd9c8 lib/Module/CPANTS/Kwalitee/Signature.pm
+SHA1 c1db4e5709350185af2c82a928a81f9b32f7deb4 lib/Module/CPANTS/Kwalitee/Uses.pm
+SHA1 fcc97826aaf35a7f03119b7946926e123cb5a264 lib/Module/CPANTS/Kwalitee/Version.pm
 SHA1 f5da9dd3db114e668f0d1de7c0e59f703d603050 t/00_load.t
 SHA1 59c9115f5109e8520676961c7471d28f8bade035 t/02_kwalitee.t
 SHA1 982789ab0449f6abbab53a62b9187ab0cee8b78c t/03_plugins.t
 SHA1 db01ed634fd833f042daf490377398f82d45d279 t/05_testdir.t
 SHA1 d6a433a08a28e2e107c12b63c32ab42d696bf47e t/05_testfile.t
-SHA1 de57581ec8bba9f1de1f42183d557c69a2c11d04 t/10_analyse.t
+SHA1 84c0f9bb7e960c8d3d2ebea3223b8b17e5226c44 t/10_analyse.t
 SHA1 3f01f689ea81da1ac0966f0e71cfaf0b40ed2d0b t/analyse_afs.t
-SHA1 da2c2e1e321594273acb60083398fbc2e994f1c1 t/analyse_axkit_xsp_l10n.t
+SHA1 ab3897618aa1c54f176b039773e436d69cc3c90f t/analyse_axkit_xsp_l10n.t
 SHA1 3c7e57d83cbef477df22d9cda901e9f7b086ec06 t/analyse_devel_timer.t
 SHA1 aadd768edb0d96e8946bb418d9bf537a20b0a556 t/analyse_eg_c.t
 SHA1 a6634d0c343cf3293ffb2aca96777507103f15bf t/analyse_html_tiny.t
@@ -92,9 +92,19 @@ SHA1 f732018f4fba395da9dacc46ce3331443e2d5076 xt/99_critic.t
 SHA1 0190346d7072d458c8a10a45c19f86db641dcc48 xt/99_pod.t
 SHA1 6da39b48ce64b584e4c3274bff96fc76ff484820 xt/99_pod_coverage.t
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.18 (GNU/Linux)
+Version: GnuPG v2.0.19 (GNU/Linux)
 
-iEYEARECAAYFAk+ExVQACgkQFtlTdOX00HqfewCglOfQRiBFnKH1DeifF2WVugjd
-ZXYAoKD7AIG2C/ctxX0Coa7/R+8nZSut
-=/NGS
+iQIcBAEBCgAGBQJRGXoTAAoJEGvjX9bn75YlOBwP/jgVTnVOh1tL7ZZL0jRV44iF
+hsCLE+bk9yzuTAd/2KrOnC7Wju55vbTV1HwmhbCLaa/3fpn7KC/Q4Z4IBx+nijVR
+eK5f7tD9EllkpIo0nja3yNP3y4QAzZLK6hauaonXXsr/EmlzEt7wLgLlgN/31dya
+TP4BJsJHHdc1eITCSnDQUA1oMV0XVbbZcSTDT1h2v09XqkqdxH5nAnI4dMHHoBHx
+9HgumfAwZqqELEOOZedc6wWTCpoRb6WgjnueSqsM/RbmMl2p/cEhgArzgZThq5Zp
+f36r196o07uet3P+VIkTS+GtCORAe4z6eL/nrLEEX5+K/96OK/YcE+kPzTA3NCHy
+OOMTVobUn868pQCbDEsEHKvsAMwPyhOQ9YUkflPp80pJSmzkWcnkR3xRXEuZhebb
+mGRRh/Gu91Dw1iJ4SNtJ/izCZmARJFZS4BxkWMKJ9K4lloaO6xh92cUSs1obSVLf
+efZHbMSuhwrFNofs7+ZXirxXelWQQJm6PmwrB8JePBPMDqYknZomMvQeAqxyJZR5
+yX0YFepA7ZjZaCg/6uJAeqR9YzCC56o0uP9ZurF6Kkdve9Qbu26aGmfoYxrYSwfs
+lxFV4AmoCZfH7rwJmQUV0viEjBTJvuFHc/Tj8CRIHEKWhY6+3Av+cUbsy7mxcNDN
+n9LMMotb9sxVJ5t5jQ7n
+=J1EA
 -----END PGP SIGNATURE-----

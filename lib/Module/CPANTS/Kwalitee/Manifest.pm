@@ -4,6 +4,8 @@ use strict;
 use File::Spec::Functions qw(catfile);
 use Array::Diff;
 
+our $VERSION = '0.87';
+
 sub order { 100 }
 
 ##################################################################
@@ -28,8 +30,11 @@ sub analyse {
         while (<$fh>) {
             chomp;
             next if /^\s*#/; # discard pure comments
-
-            s/\s.*$//; # strip file comments
+            if (s/^'(\\[\\']|.+)+'\s*.*/$1/) {
+                s/\\([\\'])/$1/g;
+            } else {
+                s/\s.*$//;
+            } # strip quotes and comments
             next unless $_; # discard blank lines
             push(@manifest,$_);
         }
