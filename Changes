@@ -4,6 +4,14 @@
 
 Changes - Revision history for Module-CPANTS-Analyse
 
+=head2 0.90_01 2013-08-01
+
+=over
+
+=item Applied all the changes in 0.88 again, and removed a few non-portable metrics for Test::Kwalitee.
+
+=back
+
 =head2 0.89 2013-08-01
 
 =over

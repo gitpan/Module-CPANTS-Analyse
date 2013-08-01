@@ -2,7 +2,6 @@ AUTHORS
 bin/cpants_lint.pl
 Build.PL
 Changes
-Debian_CPANTS.txt
 lib/Module/CPANTS/Analyse.pm
 lib/Module/CPANTS/Kwalitee.pm
 lib/Module/CPANTS/Kwalitee/BrokenInstaller.pm
@@ -67,7 +66,6 @@ t/eg/Set-Object-1.28.tar.gz
 t/eg/Term-Title-0.03.tar.gz
 t/eg/Test-YAML-Meta-0.04.tar.gz
 t/eg/Text-CSV_XS-0.40.tgz
-t/generated_files.t
 t/moose_as_strict.t
 t/older_test_kwalitee.t
 t/perl5i_as_strict.t
