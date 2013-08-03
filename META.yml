@@ -23,58 +23,58 @@ name: Module-CPANTS-Analyse
 provides:
   Module::CPANTS::Analyse:
     file: lib/Module/CPANTS/Analyse.pm
-    version: 0.90_01
+    version: 0.9002
   Module::CPANTS::Kwalitee:
     file: lib/Module/CPANTS/Kwalitee.pm
-    version: 0.90_01
+    version: 0.9002
   Module::CPANTS::Kwalitee::BrokenInstaller:
     file: lib/Module/CPANTS/Kwalitee/BrokenInstaller.pm
-    version: 0.90_01
+    version: 0.9002
   Module::CPANTS::Kwalitee::CpantsErrors:
     file: lib/Module/CPANTS/Kwalitee/CpantsErrors.pm
-    version: 0.90_01
+    version: 0.9002
   Module::CPANTS::Kwalitee::Distname:
     file: lib/Module/CPANTS/Kwalitee/Distname.pm
-    version: 0.90_01
+    version: 0.9002
   Module::CPANTS::Kwalitee::Distros:
     file: lib/Module/CPANTS/Kwalitee/Distros.pm
-    version: 0.90_01
+    version: 0.9002
   Module::CPANTS::Kwalitee::Files:
     file: lib/Module/CPANTS/Kwalitee/Files.pm
-    version: 0.90_01
+    version: 0.9002
   Module::CPANTS::Kwalitee::FindModules:
     file: lib/Module/CPANTS/Kwalitee/FindModules.pm
-    version: 0.90_01
+    version: 0.9002
   Module::CPANTS::Kwalitee::License:
     file: lib/Module/CPANTS/Kwalitee/License.pm
-    version: 0.90_01
+    version: 0.9002
   Module::CPANTS::Kwalitee::Manifest:
     file: lib/Module/CPANTS/Kwalitee/Manifest.pm
-    version: 0.90_01
+    version: 0.9002
   Module::CPANTS::Kwalitee::MetaYML:
     file: lib/Module/CPANTS/Kwalitee/MetaYML.pm
-    version: 0.90_01
+    version: 0.9002
   Module::CPANTS::Kwalitee::NeedsCompiler:
     file: lib/Module/CPANTS/Kwalitee/NeedsCompiler.pm
-    version: 0.90_01
+    version: 0.9002
   Module::CPANTS::Kwalitee::Pod:
     file: lib/Module/CPANTS/Kwalitee/Pod.pm
-    version: 0.90_01
+    version: 0.9002
   Module::CPANTS::Kwalitee::Prereq:
     file: lib/Module/CPANTS/Kwalitee/Prereq.pm
-    version: 0.90_01
+    version: 0.9002
   Module::CPANTS::Kwalitee::Repackageable:
     file: lib/Module/CPANTS/Kwalitee/Repackageable.pm
-    version: 0.90_01
+    version: 0.9002
   Module::CPANTS::Kwalitee::Signature:
     file: lib/Module/CPANTS/Kwalitee/Signature.pm
-    version: 0.90_01
+    version: 0.9002
   Module::CPANTS::Kwalitee::Uses:
     file: lib/Module/CPANTS/Kwalitee/Uses.pm
-    version: 0.90_01
+    version: 0.9002
   Module::CPANTS::Kwalitee::Version:
     file: lib/Module/CPANTS/Kwalitee/Version.pm
-    version: 0.90_01
+    version: 0.9002
 requires:
   Archive::Any::Lite: 0.06
   Archive::Tar: 1.48
@@ -98,4 +98,4 @@ resources:
   homepage: http://cpants.cpanauthors.org
   license: http://dev.perl.org/licenses/
   repository: https://github.com/cpants/Module-CPANTS-Analyse
-version: 0.90_01
+version: 0.9002

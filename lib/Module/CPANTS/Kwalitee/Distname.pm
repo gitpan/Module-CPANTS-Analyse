@@ -2,9 +2,9 @@ package Module::CPANTS::Kwalitee::Distname;
 use warnings;
 use strict;
 
-our $VERSION = '0.90_01';
+our $VERSION = '0.90_02'; $VERSION = eval $VERSION;
 
-sub order { 15 }
+sub order { 20 }
 
 ##################################################################
 # Analyse
