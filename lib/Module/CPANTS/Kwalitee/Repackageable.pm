@@ -2,7 +2,7 @@ package Module::CPANTS::Kwalitee::Repackageable;
 use warnings;
 use strict;
 
-our $VERSION = '0.90_02'; $VERSION = eval $VERSION;
+our $VERSION = '0.91';
 
 sub order { 900 }
 
@@ -60,14 +60,6 @@ Defines the order in which Kwalitee tests should be run.
 =head3 kwalitee_indicators
 
 Returns the Kwalitee Indicators datastructure.
-
-=over
-
-=item * easily_repackageable
-
-=item * easily_repackageable_by_fedora
-
-=back
 
 =head1 SEE ALSO
 

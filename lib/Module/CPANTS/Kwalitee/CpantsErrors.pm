@@ -1,8 +1,9 @@
 package Module::CPANTS::Kwalitee::CpantsErrors;
 use warnings;
 use strict;
+use version;
 
-our $VERSION = '0.90_02'; $VERSION = eval $VERSION;
+our $VERSION = '0.91';
 
 sub order { 1000 }
 
@@ -50,7 +51,7 @@ sub kwalitee_indicators {
             map {+{name => $_, code => sub {1}}}
             qw/extractable no_pod_errors
                has_test_pod has_test_pod_coverage/
-        ] if $Test::Kwalitee::VERSION < 1.08;
+        ] if version->parse(Test::Kwalitee->VERSION) < version->parse(1.08);
     }
 
     return [];
@@ -88,12 +89,6 @@ Uses C<IO::Capture::Stdout> to check for any strange things that might happen du
 =head3 kwalitee_indicators
 
 Returns the Kwalitee Indicators datastructure.
-
-=over
-
-=item * no_cpants_errors
-
-=back
 
 =head1 SEE ALSO
 

@@ -7,7 +7,7 @@ use File::stat;
 use File::Basename;
 use Data::Dumper;
 
-our $VERSION = '0.90_02'; $VERSION = eval $VERSION;
+our $VERSION = '0.91';
 
 sub order { 15 }
 
@@ -298,27 +298,6 @@ sub kwalitee_indicators {
             return "<STDIN> was found in Build.PL" if $d->{stdin_in_build_pl};
         },
     },
-    {
-        name=>'no_large_files',
-        error=>qq{This distribution has at least one file larger than $large_file bytes)},
-        remedy=>q{No remedy for that.},
-        is_experimental=>1,
-        code=>sub {
-            my $d=shift;
-            my @errors = map { "$_:$d->{files_hash}{$_}{size}" }
-                         grep { $d->{files_hash}{$_}{size} > $large_file }
-                         keys %{ $d->{files_hash} };
-            if (@errors) {
-                $d->{error}{no_large_files} = join "; ", @errors;
-                return 0;
-            }
-            return 1;
-        },
-        details=>sub {
-            my $d = shift;
-            return "The following files were found: " . $d->{error}{no_large_files};
-        },
-    },
 ];
 }
 
@@ -367,10 +346,6 @@ Returns the Kwalitee Indicators datastructure.
 
 =over
 
-=item * extractable
-
-=item * extracts_nicely
-
 =item * has_readme
 
 =item * has_manifest
@@ -387,21 +362,7 @@ Returns the Kwalitee Indicators datastructure.
 
 =item * has_tests_in_t_dir
 
-=item * buildfile_not_executable
-
-=item * has_example (optional)
-
-=item * no_generated_file
-
-=item * has_version_in_each_file
-
 =item * no_stdin_for_prompting
-
-=item * no_large_files
-
-=item * portable_filenames
-
-=item * no_dot_underscore_files
 
 =back
 

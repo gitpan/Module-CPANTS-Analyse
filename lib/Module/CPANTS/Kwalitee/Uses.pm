@@ -5,8 +5,9 @@ use File::Spec::Functions qw(catfile);
 use Module::ExtractUse;
 use Set::Scalar qw();
 use Data::Dumper;
+use version;
 
-our $VERSION = '0.90_02'; $VERSION = eval $VERSION;
+our $VERSION = '0.91';
 
 sub order { 100 }
 
@@ -33,52 +34,52 @@ sub analyse {
     my %skip=map {$_->{module}=>1 } @$modules;
     my %uses;
 
+    # used in modules
     foreach (@$modules) {
         my $p = Module::ExtractUse->new;
         my $file = catfile($distdir,$_->{file});
         $p->extract_use($file) if -f $file;
         $_->{uses} = $p->used;
-    }
 
-    # used in modules
-    my $p=Module::ExtractUse->new;
-    foreach (@$modules) {
-        my $file = catfile($distdir,$_->{file});
-        $p->extract_use($file) if -f $file;
-    }
-
-    while (my ($mod,$cnt)=each%{$p->used}) {
-        next if $skip{$mod};
-        next if $mod =~ /::$/;  # see RT#35092
-        $uses{$mod}={
-            module=>$mod,
-            in_code=>$cnt,
-            in_tests=>0,
-            evals_in_code=>($p->used_in_eval($mod) || 0),
-        };
+        while (my ($mod,$cnt)=each%{$p->used}) {
+            next if $skip{$mod};
+            next if $mod =~ /::$/;  # see RT#35092
+            $uses{$mod}{module} = $mod;
+            $uses{$mod}{in_code} += $cnt;
+            $uses{$mod}{evals_in_code} += $p->used_in_eval($mod) || 0;
+        }
     }
     
     # used in tests
-    my $pt=Module::ExtractUse->new;
     foreach my $tf (@tests) {
+        my $pt=Module::ExtractUse->new;
         my $file = catfile($distdir,$tf);
         $pt->extract_use($file) if -f $file && -s $file < 1_000_000; # skip very large test files
-    }
-    while (my ($mod,$cnt)=each%{$pt->used}) {
-        next if $skip{$mod};
-        if (@test_modules) {
-            next if grep {/(?:^|::)$mod$/} @test_modules;
-        }
-        if ($uses{$mod}) {
-            $uses{$mod}{'in_tests'}=$cnt;
-            $uses{$mod}{'evals_in_tests'}=($pt->used_in_eval($mod) || 0);
-        } else {
-            $uses{$mod}={
-                module=>$mod,
-                in_code=>0,
-                in_tests=>$cnt,
-                evals_in_tests=>($pt->used_in_eval($mod) || 0),
+
+        while (my ($mod,$cnt)=each%{$pt->used}) {
+            next if $skip{$mod};
+            if (@test_modules) {
+                next if grep {/(?:^|::)$mod$/} @test_modules;
             }
+
+            $uses{$mod}{module} = $mod;
+            $uses{$mod}{in_tests} += $cnt;
+            $uses{$mod}{evals_in_tests} += $pt->used_in_eval($mod) || 0;
+        }
+    }
+
+    # used in Makefile.PL/Build.PL
+    foreach my $f (grep /\b(?:Makefile|Build)\.PL$/, @{$me->d->{files_array} || []}) {
+        my $p = Module::ExtractUse->new;
+        my $file = catfile($distdir,$f);
+        $p->extract_use($file) if -f $file;
+
+        while (my ($mod,$cnt)=each%{$p->used}) {
+            next if $skip{$mod};
+            next if $mod =~ /::$/;  # see RT#35092
+            $uses{$mod}{module} = $mod;
+            $uses{$mod}{in_config} += $cnt;
+            $uses{$mod}{evals_in_config} += $p->used_in_eval($mod) || 0;
         }
     }
 
@@ -117,7 +118,9 @@ sub kwalitee_indicators {
                     Moo::Role
                     Moose
                     Moose::Role
+                    Moose::Exporter
                     MooseX::Declare
+                    MooseX::Role::Parameterized
                     MooseX::Types
                     Mouse
                     Mouse::Role
@@ -129,8 +132,10 @@ sub kwalitee_indicators {
                     strictures
                 ));
 
+                my $perl_version_with_implicit_stricture = version->new('5.011');
                 my @no_strict;
                 for my $module (@{ $modules }) {
+                    next if grep {/^5\./ && version->parse($_) >= $perl_version_with_implicit_stricture} keys %{$module->{uses}};
                     push @no_strict, $module->{module} if $strict_equivalents
                         ->intersection(Set::Scalar->new(keys %{ $module->{uses} }))
                         ->is_empty;
@@ -171,6 +176,7 @@ sub kwalitee_indicators {
                     Moo::Role
                     Moose
                     Moose::Role
+                    Moose::Exporter
                     MooseX::Declare
                     MooseX::Types
                     Mouse
@@ -240,6 +246,8 @@ Returns the Kwalitee Indicators datastructure.
 =over
 
 =item * use_strict
+
+=item * use_warnings
 
 =back
 

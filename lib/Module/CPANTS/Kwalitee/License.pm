@@ -4,7 +4,7 @@ use strict;
 use File::Spec::Functions qw(catfile);
 use Software::LicenseUtils;
 
-our $VERSION = '0.90_02'; $VERSION = eval $VERSION;
+our $VERSION = '0.91';
 
 sub order { 100 }
 
@@ -179,10 +179,11 @@ Returns the Kwalitee Indicators datastructure.
 
 =over
 
-=item * has_license 
+=item * has_license_in_source_file
 
-=item * has_license_in_metayml 
+=item * has_human_readable_license
 
+=item * has_separate_license_file
 
 =back
 

@@ -2,7 +2,7 @@ package Module::CPANTS::Kwalitee::Distros;
 use warnings;
 use strict;
 
-our $VERSION = '0.90_02'; $VERSION = eval $VERSION;
+our $VERSION = '0.91';
 
 sub order { 800 }
 
@@ -65,27 +65,6 @@ Defines the order in which Kwalitee tests should be run.
 =head3 kwalitee_indicators
 
 Returns the Kwalitee Indicators datastructure.
-
-=over
-
-=item * distributed_by_debian
-
-True if the module (package) is repackaged by the Debian-Perl team and 
-you can install it using the package management system of Debian.
-
-=item * latest_version_distributed_by_debian
-
-True if the latest version of the module (package) is repackaged by Debian
-
-=item * has_no_bugs_reported_in_debian
-
-True for if the module is distributed by Debian and no bugs were reported.
-
-=item * has_no_patches_in_debian
-
-True for if the module is distributed by Debian and no patches applied.
-
-=back
 
 =head1 Caveats
 

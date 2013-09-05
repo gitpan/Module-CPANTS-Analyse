@@ -6,7 +6,7 @@ use base qw(Class::Accessor);
 use Module::Pluggable search_path=>['Module::CPANTS::Kwalitee'];
 use Carp;
 
-our $VERSION = '0.90_02'; $VERSION = eval $VERSION;
+our $VERSION = '0.91';
 
 __PACKAGE__->mk_accessors(qw(generators _gencache _genhashcache _available _total));
 
@@ -19,9 +19,14 @@ sub new {
         ## no critic (ProhibitStringyEval)
         eval "require $gen";
         croak qq{cannot load $gen: $@} if $@;
-        $generators{$gen}=$gen->order;        
+        $generators{$gen}= [ $gen->order, $gen ];
     }
-    my @generators=sort { $generators{$a} <=> $generators{$b} } keys %generators;
+    # sort by 'order' first, then name
+    my @generators=sort {
+        $generators{$a}->[0] <=> $generators{$b}->[0]
+            ||
+        $generators{$a}->[1] cmp $generators{$b}->[1]
+    } keys %generators;
     $me->generators(\@generators);
     $me->_gencache({});
     return $me;

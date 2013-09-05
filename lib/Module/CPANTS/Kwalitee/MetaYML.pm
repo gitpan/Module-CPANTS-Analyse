@@ -6,7 +6,7 @@ use CPAN::Meta::YAML;
 use CPAN::Meta::Validator;
 use List::Util qw/first/;
 
-our $VERSION = '0.90_02'; $VERSION = eval $VERSION;
+our $VERSION = '0.91';
 
 sub order { 10 }
 
@@ -85,6 +85,11 @@ sub analyse {
     }
 
     # Should we still try MYMETA.json?
+
+    my $meta = $me->d->{meta_yml};
+    return unless $meta && ref $meta eq ref {};
+
+    $me->d->{dynamic_config} = $meta->{dynamic_config} ? 1 : 0;
 }
 
 ##################################################################
@@ -97,7 +102,10 @@ sub kwalitee_indicators{
             name=>'metayml_is_parsable',
             error=>q{The META.yml file of this distribution could not be parsed by the version of CPAN::Meta::YAML.pm CPANTS is using.},
             remedy=>q{If you don't have one, add a META.yml file. Else, upgrade your YAML generator so it produces valid YAML.},
-            code=>sub { shift->{metayml_is_parsable} ? 1 : 0 },
+            code=>sub {
+                my $d = shift;
+                !$d->{error}{metayml_is_parsable} && $d->{metayml_is_parsable} ? 1 : 0
+            },
             details=>sub {
                 my $d = shift;
                 $d->{error}{metayml_is_parsable};
@@ -254,6 +262,8 @@ Returns the Kwalitee Indicators datastructure.
 =item * metayml_is_parsable
 
 =item * metayml_has_license
+
+=item * metayml_has_provides
 
 =item * metayml_conforms_to_known_spec
 

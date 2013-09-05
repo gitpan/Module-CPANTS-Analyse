@@ -2,7 +2,7 @@ package Module::CPANTS::Kwalitee::Distname;
 use warnings;
 use strict;
 
-our $VERSION = '0.90_02'; $VERSION = eval $VERSION;
+our $VERSION = '0.91';
 
 sub order { 20 }
 
@@ -75,10 +75,6 @@ C<MCK::Distname> uses C<CPAN::DistnameInfo> to split a distname into it's compon
 Returns the Kwalitee Indicators datastructure.
 
 =over
-
-=item * has_version
-
-=item * has_proper_version
 
 =back
 
