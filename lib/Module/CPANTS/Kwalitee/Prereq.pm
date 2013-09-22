@@ -4,7 +4,7 @@ use strict;
 use File::Spec::Functions qw(catfile);
 use Text::Balanced qw/extract_bracketed/;
 
-our $VERSION = '0.91';
+our $VERSION = '0.92';
 
 sub order { 100 }
 
@@ -97,7 +97,8 @@ sub _from_build_pl {
         recommends     => 'is_optional_prereq',
     );
     my %res;
-    while($build_pl =~ s/^.*?((?:(?:configure|build|test)_)?requires|recommends|conflicts|auto_features)\s*=>\s*\{/{/s) {
+    # TODO: auto_features
+    while($build_pl =~ s/^.*?((?:(?:configure|build|test)_)?requires|recommends|conflicts)\s*=>\s*\{/{/s) {
         my $rel = $1;
         my ($block, $left) = extract_bracketed($build_pl, '{}');
         last unless $block;
@@ -106,9 +107,10 @@ sub _from_build_pl {
         if ($hashref && ref $hashref eq ref {}) {
             for my $module (keys %$hashref) {
                 my $type = $rel =~ /_/ ? $rel : "runtime_$rel";
+                my ($version) = ($hashref->{$module} || 0) =~ /^([0-9.]+)/;
                 push @{$res{$module} ||= []}, {
                     requires => $module,
-                    version => $hashref->{$module},
+                    version => $version,
                     type => $type,
                     ($map{$rel} ? ($map{$rel} => 1) : ()),
                 };

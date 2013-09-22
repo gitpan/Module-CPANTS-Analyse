@@ -23,6 +23,8 @@ lib/Module/CPANTS/Kwalitee/Version.pm
 Makefile.PL
 MANIFEST			This list of files
 MANIFEST.SKIP
+META.json
+META.yml
 README
 t/00_load.t
 t/02_kwalitee.t
@@ -101,5 +103,4 @@ xt/kwalitee/proper_libs.t
 xt/kwalitee/Test.pm
 xt/kwalitee/use_strict.t
 xt/kwalitee/use_warnings.t
-META.yml
-META.json
+xt/strict_warnings_equiv.t
