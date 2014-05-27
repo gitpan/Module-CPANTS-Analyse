@@ -6,11 +6,11 @@ use CPAN::Meta::YAML;
 use CPAN::Meta::Validator;
 use List::Util qw/first/;
 
-our $VERSION = '0.92';
+our $VERSION = '0.93_01';
+$VERSION = eval $VERSION; ## no critic
 
 sub order { 10 }
 
-my $CURRENT_SPEC = '1.4';
 my $JSON_CLASS;
 
 ##################################################################
@@ -27,16 +27,21 @@ sub analyse {
     # but test it anyway because it may be broken sometimes.
     if (-f $meta_yml) {
         eval {
-            open my $fh, '<:utf8', $meta_yml or die $!;
-            my $yaml = do { local $/; <$fh> };
+            my $yaml = _slurp_utf8($meta_yml, $me);
             my $meta = CPAN::Meta::YAML->read_string($yaml) or die CPAN::Meta::YAML->errstr;
             # Broken META.yml may return a "YAML 1.0" string first.
             # eg. M/MH/MHASCH/Date-Gregorian-0.07.tar.gz
-            $me->d->{meta_yml}=first { ref $_ eq ref {} } @$meta;
-            $me->d->{metayml_is_parsable}=1;
+            if (@$meta > 1 or ref $meta->[0] ne ref {}) {
+                $me->d->{meta_yml}=first { ref $_ eq ref {} } @$meta;
+                $me->d->{error}{metayml_is_parsable}="multiple parts found in META.yml";
+            } else {
+                $me->d->{meta_yml}=$meta->[0];
+                $me->d->{metayml_is_parsable}=1;
+            }
         };
-        if ($@) {
-            $me->d->{error}{metayml_is_parsable}=$@;
+        if (my $error = $@) {
+            $error =~ s/ at \S+ line \d+.+$//s;
+            $me->d->{error}{metayml_is_parsable}=$error;
         }
     } else {
         $me->d->{error}{metayml_is_parsable}="META.yml was not found";
@@ -47,7 +52,7 @@ sub analyse {
     if (!$me->d->{meta_yml}) {
         unless ($JSON_CLASS) {
             for (qw/JSON::XS JSON::PP/) {
-                if (eval "require $_; 1;") {
+                if (eval "require $_; 1;") { ## no critic
                     $JSON_CLASS = $_;
                     last;
                 }
@@ -57,8 +62,7 @@ sub analyse {
         my $meta_json = catfile($distdir,'META.json');
         if ($JSON_CLASS && -f $meta_json) {
             eval {
-                open my $fh, '<:utf8', $meta_json or return;
-                my $json = do { local $/; <$fh> };
+                my $json = _slurp_utf8($meta_json, $me);
                 my $meta = $JSON_CLASS->new->utf8->decode($json);
                 $me->d->{meta_yml} = $meta;
                 $me->d->{metayml_is_parsable} = 1;
@@ -75,8 +79,7 @@ sub analyse {
         my $mymeta_yml = catfile($distdir, 'MYMETA.yml');
         if (-f $mymeta_yml) {
             eval {
-                open my $fh, '<:utf8', $mymeta_yml or die $!;
-                my $yaml = do { local $/; <$fh> };
+                my $yaml = _slurp_utf8($mymeta_yml, $me);
                 my $meta = CPAN::Meta::YAML->read_string($yaml) or die CPAN::Meta::YAML->errstr;
                 $me->d->{meta_yml}=first { ref $_ eq ref {} } @$meta;
                 $me->d->{metayml_is_parsable} = 1;
@@ -89,7 +92,26 @@ sub analyse {
     my $meta = $me->d->{meta_yml};
     return unless $meta && ref $meta eq ref {};
 
+    my $spec = eval { CPAN::Meta::Validator->new($meta) };
+    if ($@ or !$spec->is_valid) {
+        $me->d->{error}{metayml_conforms_to_known_spec} = $@ ? $@ : join ';', sort $spec->errors;
+    }
+
     $me->d->{dynamic_config} = $meta->{dynamic_config} ? 1 : 0;
+}
+
+sub _slurp_utf8 {
+    my ($file, $me) = @_;
+    my $warning;
+    local $SIG{__WARN__} = sub { $warning = shift };
+    open my $fh, '<:encoding(UTF-8)', $file or die "$file: $!"; ## no critic
+    local $/;
+    my $content = <$fh>;
+    if ($warning) {
+        $warning =~ s/ at .+? line \d+.*$//s;
+        $me->d->{error}{metayml_is_parsable} = $warning;
+    }
+    return $content;
 }
 
 ##################################################################
@@ -112,23 +134,6 @@ sub kwalitee_indicators{
             },
         },
         {
-            name=>'metayml_has_license',
-            error=>q{This distribution does not have a license defined in META.yml.},
-            remedy=>q{Define the license if you are using in Build.PL. If you are using MakeMaker (Makefile.PL) you should upgrade to ExtUtils::MakeMaker version 6.31.},
-            is_extra=>1,
-            code=>sub { 
-                my $d=shift;
-                my $yaml=$d->{meta_yml};
-                ($yaml->{license} and $yaml->{license} ne 'unknown') ? 1 : 0 },
-            details=>sub {
-                my $d = shift;
-                my $yaml = $d->{meta_yml};
-                return "No META.yml." unless $yaml;
-                return "No license was found in META.yml." unless $yaml->{license};
-                return "Unknown license was found in META.yml.";
-            },
-        },
-        {
             name=>'metayml_has_provides',
             is_experimental=>1,
             error=>q{This distribution does not have a list of provided modules defined in META.yml.},
@@ -147,30 +152,18 @@ sub kwalitee_indicators{
         {
             name=>'metayml_conforms_to_known_spec',
             error=>q{META.yml does not conform to any recognised META.yml Spec.},
-            remedy=>q{Take a look at the META.yml Spec at http://module-build.sourceforge.net/META-spec-current.html and change your META.yml accordingly.},
+            remedy=>q{Take a look at the META.yml Spec at http://module-build.sourceforge.net/META-spec-v1.4.html (for version 1.4) or http://search.cpan.org/perldoc?CPAN::Meta::Spec (for version 2), and change your META.yml accordingly.},
             code=>sub {
                 my $d=shift;
-                return check_spec_conformance($d);
+                return 0 if $d->{error}{metayml_is_parsable};
+                return 0 if $d->{error}{metayml_conforms_to_known_spec};
+                return 1;
             },
             details=>sub {
                 my $d = shift;
                 return "No META.yml." unless $d->{meta_yml};
-                return join "; ", @{$d->{error}{metayml_conforms_to_known_spec}};
-            },
-        },
-    {
-            name=>'metayml_conforms_spec_current',
-            is_extra=>1,
-            error=>qq{META.yml does not conform to the Current META.yml Spec ($CURRENT_SPEC).},
-            remedy=>q{Take a look at the META.yml Spec at http://module-build.sourceforge.net/META-spec-current.html and change your META.yml accordingly.},
-            code=>sub {
-                my $d=shift;
-                return check_spec_conformance($d,$CURRENT_SPEC,1);
-            },
-            details=>sub {
-                my $d = shift;
-                return "No META.yml." unless $d->{meta_yml};
-                return join "; ", @{$d->{error}{metayml_conforms_spec_current}};
+                return "META.yml is broken." unless $d->{metayml_is_parsable};
+                return $d->{error}{metayml_conforms_to_known_spec};
             },
         },
         {
@@ -194,35 +187,6 @@ sub kwalitee_indicators{
     ];
 }
 
-sub check_spec_conformance {
-    my ($d,$version,$check_current)=@_;
-
-    my $report_version= $version || 'known';
-    my $yaml=$d->{meta_yml};
-    unless ($yaml && ref $yaml eq ref {} && %$yaml) {
-        my $errorname='metayml_conforms_'.($check_current?'spec_current':'to_known_spec');
-        $d->{error}{$errorname} = [$report_version, 'META.yml is missing/empty'];
-        return 0;
-    }
-
-    my $spec = CPAN::Meta::Validator->new($yaml);
-    $spec->{spec} = $version if $version;
-
-    if (!$spec->is_valid) {
-        my @errors;
-        foreach my $e ($spec->errors) {
-            next if $e=~/specification URL/ && $check_current;
-            push @errors,$e;
-        }
-        if (@errors) {
-            my $errorname='metayml_conforms_'.($check_current?'spec_current':'to_known_spec');
-            $d->{error}{$errorname} = [$report_version, sort @errors];
-            return 0;
-        }
-    }
-    return 1;
-}
-
 q{Barbies Favourite record of the moment:
   Nine Inch Nails: Year Zero};
 
@@ -232,7 +196,7 @@ __END__
 
 =head1 NAME
 
-Module::CPANTS::Kwalitee::MetaYML - Checks data availabe in META.yml
+Module::CPANTS::Kwalitee::MetaYML - Checks data available in META.yml
 
 =head1 SYNOPSIS
 
@@ -261,23 +225,13 @@ Returns the Kwalitee Indicators datastructure.
 
 =item * metayml_is_parsable
 
-=item * metayml_has_license
-
 =item * metayml_has_provides
 
 =item * metayml_conforms_to_known_spec
 
-=item * metayml_conforms_spec_current
-
 =item * metayml_declares_perl_version
 
 =back
-
-=head3 check_spec_conformance
-
-    check_spec_conformance($d,$version);
-
-Validates META.yml using Test::CPAN::Meta.
 
 =head1 SEE ALSO
 

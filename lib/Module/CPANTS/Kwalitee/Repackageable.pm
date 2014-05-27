@@ -2,7 +2,8 @@ package Module::CPANTS::Kwalitee::Repackageable;
 use warnings;
 use strict;
 
-our $VERSION = '0.92';
+our $VERSION = '0.93_01';
+$VERSION = eval $VERSION; ## no critic
 
 sub order { 900 }
 
@@ -45,7 +46,7 @@ Module::CPANTS::Kwalitee::Repackageable - Checks for various signs that make a m
 
 =head1 SYNOPSIS
 
-There are several agregate metrics in here.
+There are several aggregate metrics in here.
 
 =head1 DESCRIPTION
 

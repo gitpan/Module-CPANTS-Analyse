@@ -2,12 +2,12 @@ package Module::CPANTS::Kwalitee::Uses;
 use warnings;
 use strict;
 use File::Spec::Functions qw(catfile);
-use Module::ExtractUse;
+use Module::ExtractUse 0.33;
 use Set::Scalar qw();
-use Data::Dumper;
 use version;
 
-our $VERSION = '0.92';
+our $VERSION = '0.93_01';
+$VERSION = eval $VERSION; ## no critic
 
 # These equivalents should be reasonably well-known and, preferably,
 # well-documented. Don't add obscure modules used by only one person
@@ -16,7 +16,7 @@ our $VERSION = '0.92';
 # "use_(strict|warnings)" should fail if someone feels the need
 # to add "use $1;" in the modules.
 our @STRICT_EQUIV = qw( strict );
-our @WARNINGS_EQUIV = qw( warnings );
+our @WARNINGS_EQUIV = qw( warnings warnings::compat );
 our @STRICT_WARNINGS_EQUIV = qw(
   common::sense
   Any::Moose
@@ -50,74 +50,118 @@ sub analyse {
     
     my $distdir=$me->distdir;
     my $modules=$me->d->{modules};
-    my $files=$me->d->{files_array};
+    my $files=$me->d->{files_hash};
 
     # NOTE: all files in xt/ should be ignored because they are
     # for authors only and their dependencies may not be (and
     # often are not) listed in meta files.
-    my @tests=grep {m|^t\b.*\.t|} @$files;
+    my @tests=grep {m|^t\b.*\.t|} sort keys %$files;
     $me->d->{test_files} = \@tests;
 
-    my @test_modules = map { my $m = $_; $m =~ s|/|::|g; $m =~ s|\.pm$||; $m } grep {m|^t\b.*\.pm$|} @$files;
+    my @test_modules = map {
+        my $m = $_;
+        $m =~ s|\.pm$||;
+        $m =~ s|^t/(?:lib/)?||;
+        $m =~ s|/|::|g;
+        $m;
+    } grep {m|^t\b.*\.pm$|} keys %$files;
+    my %test_modules = map {$_ => 1} @test_modules;
 
     my %skip=map {$_->{module}=>1 } @$modules;
     my %uses;
 
     # used in modules
-    foreach (@$modules) {
-        my $p = Module::ExtractUse->new;
-        my $file = catfile($distdir,$_->{file});
-        $p->extract_use($file) if -f $file;
-        $_->{uses} = $p->used;
-
-        while (my ($mod,$cnt)=each%{$p->used}) {
-            next if $skip{$mod};
-            next if $mod =~ /::$/;  # see RT#35092
-            next unless $mod =~ /^[A-Za-z0-9:_]+$/;
-            $uses{$mod}{module} = $mod;
-            $uses{$mod}{in_code} += $cnt;
-            $uses{$mod}{evals_in_code} += $p->used_in_eval($mod) || 0;
+    foreach my $module (@$modules) {
+        my $combined = $class->_extract_use($me, $module->{file});
+        for my $key (keys %$combined) {
+            for my $mod (keys %{$combined->{$key}}) {
+                next if $skip{$mod};
+                $uses{$key.'_in_code'}{$mod} += $combined->{$key}{$mod};
+            }
         }
     }
     
     # used in tests
     foreach my $tf (@tests) {
-        my $pt=Module::ExtractUse->new;
-        my $file = catfile($distdir,$tf);
-        $pt->extract_use($file) if -f $file && -s $file < 1_000_000; # skip very large test files
-
-        while (my ($mod,$cnt)=each%{$pt->used}) {
-            next if $skip{$mod};
-            next if $mod =~ /::$/;  # see RT#35092
-            next unless $mod =~ /^[A-Za-z0-9:_]+$/;
-            if (@test_modules) {
-                next if grep {/(?:^|::)$mod$/} @test_modules;
+        my $combined = $class->_extract_use($me, $tf);
+        for my $key (keys %$combined) {
+            for my $mod (keys %{$combined->{$key}}) {
+                next if $mod =~ /^t::/;
+                next if $skip{$mod};
+                next if $test_modules{$mod};
+                $uses{$key.'_in_tests'}{$mod} += $combined->{$key}{$mod};
             }
-
-            $uses{$mod}{module} = $mod;
-            $uses{$mod}{in_tests} += $cnt;
-            $uses{$mod}{evals_in_tests} += $pt->used_in_eval($mod) || 0;
         }
     }
 
     # used in Makefile.PL/Build.PL
     foreach my $f (grep /\b(?:Makefile|Build)\.PL$/, @{$me->d->{files_array} || []}) {
-        my $p = Module::ExtractUse->new;
-        my $file = catfile($distdir,$f);
-        $p->extract_use($file) if -f $file;
-
-        while (my ($mod,$cnt)=each%{$p->used}) {
-            next if $skip{$mod};
-            next if $mod =~ /::$/;  # see RT#35092
-            next unless $mod =~ /^[A-Za-z0-9:_]+$/;
-            $uses{$mod}{module} = $mod;
-            $uses{$mod}{in_config} += $cnt;
-            $uses{$mod}{evals_in_config} += $p->used_in_eval($mod) || 0;
+        my $combined = $class->_extract_use($me, $f);
+        for my $key (keys %$combined) {
+            for my $mod (keys %{$combined->{$key}}) {
+                next if $skip{$mod};
+                $uses{$key.'_in_config'}{$mod} += $combined->{$key}{$mod};
+            }
         }
     }
 
     $me->d->{uses}=\%uses;
     return;
+}
+
+sub _extract_use {
+    my ($class, $me, $path) = @_;
+    my $file = catfile($me->distdir, $path);
+    $file =~ s|\\|/|g;
+    return unless -f $file;
+
+    my $p = Module::ExtractUse->new;
+    $p->extract_use($file);
+
+    # used actually contains required/noed
+    my %used = %{ $p->used || {} };
+    my %required = %{ $p->required || {} };
+    my %noed = %{ $p->noed || {} };
+
+    my %combined;
+    for my $mod (keys %used) {
+        next if $mod =~ /::$/; # see RT#35092
+        next unless $mod =~ /^(?:5\.[0-9.]+|[A-za-z0-9:_]+)$/;
+        $combined{used}{$mod} += $used{$mod};
+        if (my $used_in_eval = $p->used_in_eval($mod)) {
+            $combined{used_in_eval}{$mod} += $used_in_eval;
+            $combined{used}{$mod} -= $used_in_eval;
+        }
+        if ($required{$mod}) {
+            $combined{used}{$mod} -= $required{$mod};
+            $combined{required}{$mod} += $required{$mod};
+            if (my $required_in_eval = $p->required_in_eval($mod)) {
+                $combined{used}{$mod} += $required_in_eval;
+                $combined{used_in_eval}{$mod} -= $required_in_eval;
+                $combined{required}{$mod} -= $required_in_eval;
+                $combined{required_in_eval}{$mod} += $required_in_eval;
+            }
+        }
+        if ($noed{$mod}) {
+            $combined{used}{$mod} -= $noed{$mod};
+            $combined{noed}{$mod} += $noed{$mod};
+            if (my $noed_in_eval = $p->noed_in_eval($mod)) {
+                $combined{used}{$mod} += $noed_in_eval;
+                $combined{used_in_eval}{$mod} -= $noed_in_eval;
+                $combined{noed}{$mod} -= $noed_in_eval;
+                $combined{noed_in_eval}{$mod} += $noed_in_eval;
+            }
+        }
+        for (qw/used used_in_eval required noed/) {
+            delete $combined{$_}{$mod} unless $combined{$_}{$mod};
+        }
+    }
+
+    for my $key (keys %combined) {
+        next unless %{$combined{$key}};
+        $me->d->{files_hash}{$path}{$key} = [sort keys %{$combined{$key}}];
+    }
+    return \%combined;
 }
 
 ##################################################################
@@ -128,23 +172,31 @@ sub kwalitee_indicators {
     return [
         {
             name=>'use_strict',
-            error=>q{This distribution does not 'use strict;' (or its equivalents) in all of its modules. Note that this is not about the actual strictness of the modules. It's bad if nobody can tell whether the modules are strictly written or not, without reading the source code of your favorite clever module that actually enforces strictness. In other words, it's bad if someone feels the need to add 'use strict' to the modules.},
-            remedy=>q{Add 'use strict' to all modules, or convince us that your favorite module is well-known enough and people can easily see the modules are strictly written.},
+            error=>q{This distribution does not 'use strict;' (or its equivalents) in all of its modules. Note that this is not about the actual strictness of the modules. It's bad if nobody can tell whether the modules are strictly written or not, without reading the source code of your favorite clever module that actually enforces strictness. In other words, it's bad if someone feels the need to add 'use strict' to your modules.},
+            remedy=>q{Add 'use strict' (or its equivalents) to all modules, or convince us that your favorite module is well-known enough and people can easily see the modules are strictly written.},
+            ignorable => 1,
             code=>sub {
                 my $d       = shift;
-                my $modules = $d->{modules};
-                my $uses    = $d->{uses};
-                return 0 unless $modules && $uses;
+                my $files = $d->{files_hash} || {};
 
                 # There are lots of acceptable strict alternatives
                 my $strict_equivalents = Set::Scalar->new->insert(@STRICT_EQUIV, @STRICT_WARNINGS_EQUIV);
 
-                my $perl_version_with_implicit_stricture = version->new('5.011');
+                my $perl_version_with_implicit_stricture = version->new('5.011')->numify;
                 my @no_strict;
-                for my $module (@{ $modules }) {
-                    next if grep {/^5\./ && version->parse($_) >= $perl_version_with_implicit_stricture} keys %{$module->{uses}};
-                    push @no_strict, $module->{module} if $strict_equivalents
-                        ->intersection(Set::Scalar->new(keys %{ $module->{uses} }))
+
+                for my $file (keys %$files) {
+                    next unless exists $files->{$file}{module};
+                    my $module = $files->{$file}{module};
+                    my %used;
+                    for my $key (qw/used required/) {
+                        next unless exists $files->{$file}{$key};
+                        $used{$_} = 1 for @{$files->{$file}{$key} || []};
+                    }
+                    next if grep {/^5\./ && version->parse($_)->numify >= $perl_version_with_implicit_stricture} keys %used;
+
+                    push @no_strict, $module if $strict_equivalents
+                        ->intersection(Set::Scalar->new(keys %used))
                         ->is_empty;
                 }
                 if (@no_strict) {
@@ -160,21 +212,27 @@ sub kwalitee_indicators {
         },
         {
             name=>'use_warnings',
-            error=>q{This distribution does not 'use warnings;' in all of its modules. Note that this is not about that your modules actually warn when something bad happens. It's bad if nobody can tell if modules warns or not, without reading the source code of your favorite module that actually enforces warnings. In other words, it's bad if someone feels the need to add 'use warnings' to the modules.},
+            error=>q{This distribution does not 'use warnings;' (or its equivalents) in all of its modules. Note that this is not about that your modules actually warn when something bad happens. It's bad if nobody can tell if a module warns or not, without reading the source code of your favorite module that actually enforces warnings. In other words, it's bad if someone feels the need to add 'use warnings' to your modules.},
             is_extra=>1,
-            remedy=>q{Add 'use warnings' to all modules (this will require perl > 5.6), or convince us that your favorite module is well-known enough and people can easily see the modules warn when something bad happens.},
+            ignorable => 1,
+            remedy=>q{Add 'use warnings' (or its equivalents) to all modules (this will require perl > 5.6), or convince us that your favorite module is well-known enough and people can easily see the modules warn when something bad happens.},
             code=>sub {
-                my $d       = shift;
-                my $modules = $d->{modules};
-                my $uses    = $d->{uses};
-                return 0 unless $modules && $uses;
+                my $d = shift;
+                my $files = $d->{files_hash} || {};
 
                 my $warnings_equivalents = Set::Scalar->new->insert(@WARNINGS_EQUIV, @STRICT_WARNINGS_EQUIV);
 
                 my @no_warnings;
-                for my $module (@{ $modules }) {
-                    push @no_warnings, $module->{module} if $warnings_equivalents
-                        ->intersection(Set::Scalar->new(keys %{ $module->{uses} }))
+                for my $file (keys %$files) {
+                    next unless exists $files->{$file}{module};
+                    my $module = $files->{$file}{module};
+                    my %used;
+                    for my $key (qw/used required/) {
+                        next unless exists $files->{$file}{$key};
+                        $used{$_} = 1 for @{$files->{$file}{$key} || []};
+                    }
+                    push @no_warnings, $module if $warnings_equivalents
+                        ->intersection(Set::Scalar->new(keys %used))
                         ->is_empty;
                 }
                 if (@no_warnings) {

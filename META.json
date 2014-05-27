@@ -1,10 +1,11 @@
 {
    "abstract" : "Generate Kwalitee ratings for a distribution",
    "author" : [
-      "Lars Dɪᴇᴄᴋᴏᴡ <daxim@cpan.org>"
+      "Thomas Klausner <domm@cpan.org>",
+      "Kenichi Ishigaki <ishigaki@cpan.org>"
    ],
-   "dynamic_config" : 1,
-   "generated_by" : "Module::Build version 0.4007, CPAN::Meta::Converter version 2.132620",
+   "dynamic_config" : 0,
+   "generated_by" : "ExtUtils::MakeMaker version 6.76, CPAN::Meta::Converter version 2.140640",
    "keywords" : [
       "CPANTS",
       "kwalitee"
@@ -17,10 +18,17 @@
       "version" : "2"
    },
    "name" : "Module-CPANTS-Analyse",
+   "no_index" : {
+      "directory" : [
+         "t",
+         "inc"
+      ]
+   },
    "prereqs" : {
       "build" : {
          "requires" : {
             "Cwd" : "0",
+            "ExtUtils::MakeMaker" : "0",
             "Test::Deep" : "0",
             "Test::More" : "0",
             "Test::NoWarnings" : "0",
@@ -29,7 +37,7 @@
       },
       "configure" : {
          "requires" : {
-            "Module::Build" : "0.4"
+            "ExtUtils::MakeMaker::CPANfile" : "0.06"
          }
       },
       "runtime" : {
@@ -38,108 +46,29 @@
             "Archive::Tar" : "1.48",
             "Array::Diff" : "0.04",
             "CPAN::DistnameInfo" : "0.06",
-            "CPAN::Meta::Validator" : "2.131490",
+            "CPAN::Meta::Validator" : "2.133380",
             "CPAN::Meta::YAML" : "0.008",
             "Class::Accessor" : "0.19",
-            "File::Find::Rule::VCS" : "0",
             "IO::Capture" : "0.05",
-            "Module::ExtractUse" : "0.30",
+            "Module::ExtractUse" : "0.33",
             "Module::Pluggable" : "2.96",
             "Set::Scalar" : "0",
-            "Software::License" : "0.003",
+            "Software::License" : "0.103008",
+            "Software::License::CC_BY_SA_3_0" : "0",
             "Text::Balanced" : "0",
-            "YAML::Any" : "0",
-            "perl" : "5.006",
             "version" : "0.73"
          }
       }
    },
-   "provides" : {
-      "Module::CPANTS::Analyse" : {
-         "file" : "lib/Module/CPANTS/Analyse.pm",
-         "version" : "0.92"
-      },
-      "Module::CPANTS::Kwalitee" : {
-         "file" : "lib/Module/CPANTS/Kwalitee.pm",
-         "version" : "0.92"
-      },
-      "Module::CPANTS::Kwalitee::BrokenInstaller" : {
-         "file" : "lib/Module/CPANTS/Kwalitee/BrokenInstaller.pm",
-         "version" : "0.92"
-      },
-      "Module::CPANTS::Kwalitee::CpantsErrors" : {
-         "file" : "lib/Module/CPANTS/Kwalitee/CpantsErrors.pm",
-         "version" : "0.92"
-      },
-      "Module::CPANTS::Kwalitee::Distname" : {
-         "file" : "lib/Module/CPANTS/Kwalitee/Distname.pm",
-         "version" : "0.92"
-      },
-      "Module::CPANTS::Kwalitee::Distros" : {
-         "file" : "lib/Module/CPANTS/Kwalitee/Distros.pm",
-         "version" : "0.92"
-      },
-      "Module::CPANTS::Kwalitee::Files" : {
-         "file" : "lib/Module/CPANTS/Kwalitee/Files.pm",
-         "version" : "0.92"
-      },
-      "Module::CPANTS::Kwalitee::FindModules" : {
-         "file" : "lib/Module/CPANTS/Kwalitee/FindModules.pm",
-         "version" : "0.92"
-      },
-      "Module::CPANTS::Kwalitee::License" : {
-         "file" : "lib/Module/CPANTS/Kwalitee/License.pm",
-         "version" : "0.92"
-      },
-      "Module::CPANTS::Kwalitee::Manifest" : {
-         "file" : "lib/Module/CPANTS/Kwalitee/Manifest.pm",
-         "version" : "0.92"
-      },
-      "Module::CPANTS::Kwalitee::MetaYML" : {
-         "file" : "lib/Module/CPANTS/Kwalitee/MetaYML.pm",
-         "version" : "0.92"
-      },
-      "Module::CPANTS::Kwalitee::NeedsCompiler" : {
-         "file" : "lib/Module/CPANTS/Kwalitee/NeedsCompiler.pm",
-         "version" : "0.92"
-      },
-      "Module::CPANTS::Kwalitee::Pod" : {
-         "file" : "lib/Module/CPANTS/Kwalitee/Pod.pm",
-         "version" : "0.92"
-      },
-      "Module::CPANTS::Kwalitee::Prereq" : {
-         "file" : "lib/Module/CPANTS/Kwalitee/Prereq.pm",
-         "version" : "0.92"
-      },
-      "Module::CPANTS::Kwalitee::Repackageable" : {
-         "file" : "lib/Module/CPANTS/Kwalitee/Repackageable.pm",
-         "version" : "0.92"
-      },
-      "Module::CPANTS::Kwalitee::Signature" : {
-         "file" : "lib/Module/CPANTS/Kwalitee/Signature.pm",
-         "version" : "0.92"
-      },
-      "Module::CPANTS::Kwalitee::Uses" : {
-         "file" : "lib/Module/CPANTS/Kwalitee/Uses.pm",
-         "version" : "0.92"
-      },
-      "Module::CPANTS::Kwalitee::Version" : {
-         "file" : "lib/Module/CPANTS/Kwalitee/Version.pm",
-         "version" : "0.92"
-      }
-   },
-   "release_status" : "stable",
+   "release_status" : "testing",
    "resources" : {
       "bugtracker" : {
          "web" : "https://rt.cpan.org/Public/Dist/Display.html?Name=Module-CPANTS-Analyse"
       },
       "homepage" : "http://cpants.cpanauthors.org",
-      "license" : [
-         "http://dev.perl.org/licenses/"
-      ],
       "repository" : {
          "url" : "https://github.com/cpants/Module-CPANTS-Analyse"
       }
    },
-   "version" : "0.92"
+   "version" : "0.93_01"
 }

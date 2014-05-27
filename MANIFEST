@@ -1,7 +1,7 @@
 AUTHORS
 bin/cpants_lint.pl
-Build.PL
 Changes
+cpanfile
 lib/Module/CPANTS/Analyse.pm
 lib/Module/CPANTS/Kwalitee.pm
 lib/Module/CPANTS/Kwalitee/BrokenInstaller.pm
@@ -32,8 +32,6 @@ t/03_plugins.t
 t/05_testdir.t
 t/05_testfile.t
 t/10_analyse.t
-t/11_hash_random.pl
-t/11_hash_random.t
 t/analyse_afs.t
 t/analyse_axkit_xsp_l10n.t
 t/analyse_devel_timer.t
@@ -73,14 +71,17 @@ t/perl5i_as_warnings.t
 t/plugin_manifest.t
 t/unpack.t
 t/unpack_notextractable.t
+t/x_cpants.t
 TODO
 xt/99_critic.t
 xt/99_pod.t
 xt/99_pod_coverage.t
 xt/kwalitee.t
+xt/kwalitee/has_abstract_in_pod.t
 xt/kwalitee/has_buildtool.t
 xt/kwalitee/has_changelog.t
 xt/kwalitee/has_human_readable_license.t
+xt/kwalitee/has_known_license_in_source_file.t
 xt/kwalitee/has_license_in_source_file.t
 xt/kwalitee/has_manifest.t
 xt/kwalitee/has_meta_yml.t
@@ -89,12 +90,12 @@ xt/kwalitee/has_separate_license_file.t
 xt/kwalitee/has_tests.t
 xt/kwalitee/has_tests_in_t_dir.t
 xt/kwalitee/manifest_matches_dist.t
-xt/kwalitee/metayml_conforms_spec_current.t
 xt/kwalitee/metayml_conforms_to_known_spec.t
 xt/kwalitee/metayml_declares_perl_version.t
 xt/kwalitee/metayml_has_license.t
 xt/kwalitee/metayml_has_provides.t
 xt/kwalitee/metayml_is_parsable.t
+xt/kwalitee/no_abstract_stub_in_pod.t
 xt/kwalitee/no_broken_auto_install.t
 xt/kwalitee/no_broken_module_install.t
 xt/kwalitee/no_stdin_for_prompting.t
@@ -103,4 +104,6 @@ xt/kwalitee/proper_libs.t
 xt/kwalitee/Test.pm
 xt/kwalitee/use_strict.t
 xt/kwalitee/use_warnings.t
+xt/lint/experimental_fails.t
+xt/lint/Test.pm
 xt/strict_warnings_equiv.t

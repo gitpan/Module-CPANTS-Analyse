@@ -4,7 +4,8 @@ use strict;
 use File::Spec::Functions qw(catfile);
 use Text::Balanced qw/extract_bracketed/;
 
-our $VERSION = '0.92';
+our $VERSION = '0.93_01';
+$VERSION = eval $VERSION; ## no critic
 
 sub order { 100 }
 
@@ -30,7 +31,7 @@ sub _from_meta {
 
     my $spec = $meta->{'meta-spec'};
     my %res;
-    if ($spec && ref $spec eq ref {} && ($spec->{version} + 0) >= 2) {
+    if ($spec && ref $spec eq ref {} && ($spec->{version} || 0) =~ /^(\d+)/ && $1 >= 2) {
         # meta spec ver2
         my $prereqs = $meta->{prereqs};
 
@@ -103,7 +104,7 @@ sub _from_build_pl {
         my ($block, $left) = extract_bracketed($build_pl, '{}');
         last unless $block;
 
-        my $hashref = do { no strict; no warnings; eval $block };
+        my $hashref = do { no strict; no warnings; eval $block }; ## no critic
         if ($hashref && ref $hashref eq ref {}) {
             for my $module (keys %$hashref) {
                 my $type = $rel =~ /_/ ? $rel : "runtime_$rel";
@@ -149,7 +150,7 @@ sub _from_makefile_pl {
             # TODO
             while($makefile_pl =~ s/(?:^|;).+?((?:(?:configure|build|test)_)?requires|recommends)\s*([^;]+);//s) {
                 my ($rel, $tuple_text) = ($1, $2);
-                my @tuples = do { no strict; no warnings; eval $tuple_text };
+                my @tuples = do { no strict; no warnings; eval $tuple_text }; ## no critic
                 my $type = $rel =~ /_/ ? $rel : "runtime_$rel";
                 while(@tuples) {
                     my $module = shift @tuples or last;
@@ -169,7 +170,7 @@ sub _from_makefile_pl {
                 my ($block, $left) = extract_bracketed($makefile_pl, '{}');
                 last unless $block;
 
-                my $hashref = do { no strict; no warnings; eval $block };
+                my $hashref = do { no strict; no warnings; eval $block }; ## no critic
                 if ($hashref && ref $hashref eq ref {}) {
                     for my $module (keys %$hashref) {
                         my $type = $rel eq 'PREREQ_PM' ? "runtime_requires" : lc $rel;
@@ -292,7 +293,7 @@ sub _from_dist_ini {
 
 sub kwalitee_indicators{
     # NOTE: The metrics in this module have moved to
-    # Module::CPANTS::SiteKwalitee because these requires databases.
+    # Module::CPANTS::SiteKwalitee because these require databases.
 
     return [];
 }
@@ -307,7 +308,7 @@ __END__
 
 =head1 NAME
 
-Module::CPANTS::Kwalitee::Prereq - Checks listed prerequistes
+Module::CPANTS::Kwalitee::Prereq - Checks listed prerequisites
 
 =head1 SYNOPSIS
 

@@ -6,6 +6,7 @@ use base qw(Class::Accessor);
 use File::Temp qw(tempdir);
 use File::Spec::Functions qw(catfile catdir splitpath);
 use File::Copy;
+use File::stat;
 use Archive::Any::Lite;
 use Carp;
 use Module::CPANTS::Kwalitee;
@@ -13,7 +14,8 @@ use IO::Capture::Stdout;
 use IO::Capture::Stderr;
 use CPAN::DistnameInfo;
 
-our $VERSION = '0.92';
+our $VERSION = '0.93_01';
+$VERSION = eval $VERSION; ## no critic
 
 # setup logger
 if (! main->can('logger')) {
@@ -25,7 +27,7 @@ if (! main->can('logger')) {
 use Module::Pluggable search_path=>['Module::CPANTS::Kwalitee'];
 
 __PACKAGE__->mk_accessors(qw(dist opts tarball distdir d mck capture_stdout capture_stderr));
-__PACKAGE__->mk_accessors(qw(_testdir _dont_cleanup _tarball));
+__PACKAGE__->mk_accessors(qw(_testdir _dont_cleanup _tarball _x_opts));
 
 
 sub new {
@@ -59,32 +61,25 @@ sub unpack {
     return 'cant find dist' unless $me->dist;
 
     my $di=CPAN::DistnameInfo->new($me->dist);
-    my ($major,$minor);
-    if ($di->version) {
-        ($major,$minor)=$di->version=~/^(\d+)\.(.*)/;
-    }
-    $major=0 unless defined($major);
     my $ext=$di->extension || 'unknown';
     
     $me->d->{package}=$di->filename;
     $me->d->{vname}=$di->distvname;
     $me->d->{extension}=$ext;
     $me->d->{version}=$di->version;
-    $me->d->{version_major}=$major;
-    $me->d->{version_minor}=$minor;
     $me->d->{dist}=$di->dist;
     $me->d->{author}=$di->cpanid;
+    $me->d->{released} = stat($me->dist)->mtime;
+    $me->d->{size_packed}=-s $me->dist;
 
     unless($me->d->{package}) {
         $me->d->{package}=$me->tarball;
     }
 
     copy($me->dist,$me->testfile);
-    $me->d->{size_packed}=-s $me->testfile;
-    
-    my $archive;
+
     eval {
-        $archive=Archive::Any::Lite->new($me->testfile);
+        my $archive=Archive::Any::Lite->new($me->testfile);
         $archive->extract($me->testdir);
     };
 
@@ -94,11 +89,12 @@ sub unpack {
             $me->capture_stderr->stop;
         }
         $me->d->{extractable}=0;
-        $me->d->{error}{cpants}=$error;
+        $me->d->{error}{extractable}=$error;
         $me->d->{kwalitee}{extractable}=0;
         my ($vol,$dir,$name)=splitpath($me->dist);
         $name=~s/\..*$//;
         $name=~s/\-[\d\.]+$//;
+        $name=~s/\-TRIAL[0-9]*//;
         $me->d->{dist}=$name;
         return $error;
     }
@@ -110,13 +106,19 @@ sub unpack {
     my @stuff=grep {/\w/} readdir($fh_testdir);
 
     if (@stuff == 1) {
-        my $vname = $di->distvname;
-        $vname =~ s/\-TRIAL//;
         $me->distdir(catdir($me->testdir,$stuff[0]));
-        $me->d->{extracts_nicely}=1 if $vname eq $stuff[0];
-        
+        if (-d $me->distdir) {
+
+          my $vname = $di->distvname;
+          $vname =~ s/\-TRIAL[0-9]*//;
+
+          $me->d->{extracts_nicely}=1 if $vname eq $stuff[0];
+        } else {
+          $me->distdir($me->testdir);
+          $me->d->{extracts_nicely}=0;
+        }
     } else {
-        $me->distdir(catdir($me->testdir));
+        $me->distdir($me->testdir);
         $me->d->{extracts_nicely}=0;
     }
     return;
@@ -136,15 +138,41 @@ sub calc_kwalitee {
 
     my $kwalitee=0;
     $me->d->{kwalitee}={};
+    my @aggregators;
+    my %x_ignore = %{$me->x_opts->{ignore} || {}};
     foreach my $mod (@{$me->mck->generators}) {
         foreach my $i (@{$mod->kwalitee_indicators}) {
             next if $i->{needs_db};
+            if ($i->{aggregating}) {
+                push @aggregators, $i;
+                next;
+            }
+
             main::logger($i->{name});
             my $rv=$i->{code}($me->d, $i);
             $me->d->{kwalitee}{$i->{name}}=$rv;
+            if ($x_ignore{$i->{name}} && $i->{ignorable}) {
+                $me->d->{kwalitee}{$i->{name}} = 1;
+                if ($me->d->{error}{$i->{name}}) {
+                    $me->d->{error}{$i->{name}} .= ' [ignored]';
+                }
+            }
             $kwalitee+=$rv;
         }
     }
+    foreach my $i (@aggregators) {
+        main::logger($i->{name});
+        my $rv=$i->{code}($me->d, $i);
+        $me->d->{kwalitee}{$i->{name}}=$rv;
+        if ($x_ignore{$i->{name}} && $i->{ignorable}) {
+            $me->d->{kwalitee}{$i->{name}} = 1;
+            if ($me->d->{error}{$i->{name}}) {
+                $me->d->{error}{$i->{name}} .= ' [ignored]';
+            }
+        }
+        $kwalitee+=$rv;
+    }
+
     $me->d->{'kwalitee'}{'kwalitee'}=$kwalitee;
     main::logger("done");
 }
@@ -175,7 +203,22 @@ sub tarball {
     return $me->_tarball($tb);
 }
 
-
+sub x_opts {
+    my $me = shift;
+    return $me->_x_opts if $me->_x_opts;
+    my %opts;
+    if (my $x_cpants = $me->d->{meta_yml}{x_cpants}) {
+        if (my $ignore = $x_cpants->{ignore}) {
+            if (ref $ignore eq ref {}) {
+                $opts{ignore} = $ignore;
+            }
+            else {
+                $me->d->{error}{x_cpants} = "x_cpants ignore should be a hash reference (key: metric, value: reason to ignore)";
+            }
+        }
+    }
+    $me->_x_opts(\%opts);
+}
 
 q{Favourite record of the moment:
   Jahcoozi: Pure Breed Mongrel};
@@ -238,13 +281,13 @@ Returns the location of the unextracted tarball.
 
 Returns the filename of the tarball.
 
-=head3 read_meta_yml
+=head3 x_opts
 
-Reads the META.yml file and returns its content.
+Returns a hash reference that holds normalized information set in the "x_cpants" custom META field.
 
 =head1 WEBSITE
 
-L<http://cpants.perl.org/>
+L<http://cpants.cpanauthors.org/>
 
 =head1 BUGS
 

@@ -2,7 +2,8 @@ package Module::CPANTS::Kwalitee::Distname;
 use warnings;
 use strict;
 
-our $VERSION = '0.92';
+our $VERSION = '0.93_01';
+$VERSION = eval $VERSION; ## no critic
 
 sub order { 20 }
 
@@ -18,7 +19,7 @@ sub analyse {
     # duplication.
 
     # Note also that this stub should not be removed so that
-    # this can replace the old ::Signature module, and the old
+    # this can replace the old ::Distname module, and the old
     # metrics will not be loaded while loading plugins.
     return;
 }
@@ -54,7 +55,7 @@ Module::CPANTS::Kwalitee::Distname - Proper Distname layout
 
 Checks if a distname is well-formed.
 
-A wellformed distname looks like C<Foo-Bar-1.42.tgz>
+A well-formed distname looks like C<Foo-Bar-1.42.tgz>
 
 =head1 DESCRIPTION
 

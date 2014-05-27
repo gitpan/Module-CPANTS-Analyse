@@ -1,10 +1,10 @@
 package Module::CPANTS::Kwalitee::FindModules;
 use warnings;
 use strict;
-use Data::Dumper;
 use File::Spec::Functions;
 
-our $VERSION = '0.92';
+our $VERSION = '0.93_01';
+$VERSION = eval $VERSION; ## no critic
 
 sub order { 30 }
 
@@ -37,6 +37,9 @@ sub analyse {
             }
             
             push(@{$me->d->{modules}},$found);
+            if (exists $me->d->{files_hash}{$file}) {
+                $me->d->{files_hash}{$file}{module} = $module;
+            }
         }
     }
     else {
@@ -48,6 +51,7 @@ sub analyse {
             next if $file=~m{^test/};
             next if $file=~m/^(bin|scripts?|ex|eg|examples?|samples?|demos?)\/\w/i;
             next if $file=~m{^inc/};   # skip Module::Install stuff
+            next if $file=~m{^(local|perl5|fatlib)/};
 
             # proper file in lib/
             if ($file=~m|^lib/(.*)\.pm$|) {
@@ -59,6 +63,7 @@ sub analyse {
                     in_basedir=>0,
                     in_lib=>1,
                 });
+                $me->d->{files_hash}{$file}{module} = $module;
             }
             else {
                 # open file and find first package
@@ -89,6 +94,7 @@ sub analyse {
                         in_basedir=> $in_basedir{$file} ? 1 : 0,
                         in_lib=>0,
                     });
+                    $me->d->{files_hash}{$file}{module} = $module;
                 }
             }
         }

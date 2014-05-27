@@ -4,8 +4,6 @@ use strict;
 use Module::CPANTS::Analyse;
 use Getopt::Long;
 use IO::Capture::Stdout;
-use Data::Dumper;
-use YAML::Any;
 use File::Spec::Functions;
 use Cwd;
 use Pod::Usage;
@@ -45,10 +43,13 @@ else {
     $mca->calc_kwalitee;
 
     if ($opts{dump}) {
+        no warnings 'once';
+        require Data::Dumper;
         $Data::Dumper::Sortkeys=1;
-        $output=Dumper($mca->d);
+        $output=Data::Dumper::Dumper($mca->d);
     } elsif ($opts{yaml}) {
-        $output=Dump($mca->d);
+        require CPAN::Meta::YAML;
+        $output=CPAN::Meta::YAML::Dump($mca->d);
     } else {
     
         # build up lists of failed metrics
@@ -56,10 +57,14 @@ else {
         my ($core_kw,$opt_kw)=(0,0);
         my $kwl=$mca->d->{kwalitee};
  
-        my @need_db;
+        my @ignored;
         foreach my $ind (@{$mca->mck->get_indicators}) {
             if ($ind->{needs_db}) {
-                push(@need_db,$ind);
+                push(@ignored,$ind->{name});
+                next;
+            }
+            if ($mca->x_opts->{ignore}{$ind->{name}} && $ind->{ignorable}) {
+                push(@ignored,$ind->{name});
                 next;
             }
             if ($ind->{is_extra}) {
@@ -93,11 +98,11 @@ else {
         my $total_kw=$core_kw+$opt_kw;
 
         $output.="Kwalitee rating\t\t".sprintf("%.2f",100*$total_kw/$max_core_kw)."% ($total_kw/$max_core_kw)\n";
-        if (@need_db) {
-            $output.="Ignoring metrics\t".join(', ',map {$_->{name} } @need_db);
+        if (@ignored) {
+            $output.="Ignoring metrics\t".join(', ', @ignored);
         }
 
-        if ($total_kw == $max_kw - @need_db) {
+        if (!@core_failure && !@opt_failure && !@exp_failure) {
             $output.="\nCongratulations for building a 'perfect' distribution!\n";
         } else {
             if (@core_failure) {

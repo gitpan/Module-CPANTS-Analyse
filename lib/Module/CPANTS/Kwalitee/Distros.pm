@@ -2,7 +2,8 @@ package Module::CPANTS::Kwalitee::Distros;
 use warnings;
 use strict;
 
-our $VERSION = '0.92';
+our $VERSION = '0.93_01';
+$VERSION = eval $VERSION; ## no critic
 
 sub order { 800 }
 
@@ -88,7 +89,7 @@ CPANTS does not yet handle the second issue.
 
 Basic homepage: http://packages.debian.org/src:$pkgname
 
-Detalied homepage: http://packages.qa.debian.org/$pkgname
+Detailed homepage: http://packages.qa.debian.org/$pkgname
 
 Bugs report: http://bugs.debian.org/src:$pkgname
 

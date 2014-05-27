@@ -4,7 +4,8 @@ use strict;
 use File::Spec::Functions qw(catfile);
 use Software::LicenseUtils;
 
-our $VERSION = '0.92';
+our $VERSION = '0.93_01';
+$VERSION = eval $VERSION; ## no critic
 
 sub order { 100 }
 
@@ -26,45 +27,50 @@ sub analyse {
             $me->d->{license} = $yaml->{license}.' defined in META.yml';
         }
     }
-    my $files = $me->d->{files_hash};
+    # use "files_array" to exclude files listed in "no_index".
+    my $files = $me->d->{files_array} || [];
 
     # check if there's a LICEN[CS]E file
-    if (my ($file) = grep {exists $files->{$_}} qw/LICENCE LICENSE/) {
+    if (my ($file) = grep {$_ =~ /^LICEN[CS]E$/} @$files) {
         $me->d->{license} .= " defined in $file";
         $me->d->{external_license_file}=$file;
     }
 
     # check pod
     my %licenses;
-    foreach my $file (grep { /\.p(m|od|l)$/ } keys %$files ) {
+    foreach my $file (grep { /\.p(m|od|l)$/ } sort @$files ) {
         my $path = catfile($distdir, $file);
         next unless -r $path; # skip if not readable
         open my $fh, '<', $path or next;
         my $in_pod = 0;
         my $pod = '';
+        my $pod_head = '';
         my @possible_licenses;
         my @unknown_license_texts;
         while(<$fh>) {
             if (/^=head\d\s+.*\b(?i:LICEN[CS]E|LICEN[CS]ING|COPYRIGHT|LEGAL)\b/) {
+                $me->d->{license_in_pod} = 1;
+                $me->d->{license} ||= "defined in POD ($file)";
                 if ($in_pod) {
-                    my @guessed = Software::LicenseUtils->guess_license_from_pod("$pod\n\n=cut\n");
+                    my @guessed = Software::LicenseUtils->guess_license_from_pod("=head1 LICENSE\n$pod\n\n=cut\n");
                     if (@guessed) {
                         push @possible_licenses, @guessed;
                     } else {
-                        push @unknown_license_texts, $pod;
+                        push @unknown_license_texts, "$pod_head$pod";
                     }
                 }
 
                 $in_pod = 1;
-                $pod = "=head1 LICENSE\n";
+                $pod_head = $_;
+                $pod = '';
             }
             elsif (/^=(?:head\d\s+|cut)\b/) {
                 if ($in_pod) {
-                    my @guessed = Software::LicenseUtils->guess_license_from_pod("$pod\n\n=cut\n");
+                    my @guessed = Software::LicenseUtils->guess_license_from_pod("=head1 LICENSE\n$pod\n\n=cut\n");
                     if (@guessed) {
                         push @possible_licenses, @guessed;
                     } else {
-                        push @unknown_license_texts, $pod;
+                        push @unknown_license_texts, "$pod_head$pod";
                     }
                 }
                 $in_pod = 0;
@@ -75,21 +81,20 @@ sub analyse {
             }
         }
         if ($pod) {
-            my @guessed = Software::LicenseUtils->guess_license_from_pod("$pod\n\n=cut\n");
+            my @guessed = Software::LicenseUtils->guess_license_from_pod("=head1 LICENSE\n$pod\n\n=cut\n");
             if (@guessed) {
                 push @possible_licenses, @guessed;
             } else {
-                push @unknown_license_texts, $pod;
+                push @unknown_license_texts, "$pod_head$pod";
             }
         }
-        $me->d->{unknown_license_texts} = join "\n", @unknown_license_texts;
-
-        next unless @possible_licenses;
-        $me->d->{license_in_pod} = 1;
-        $me->d->{license} ||= "defined in POD ($file)";
-
-        $licenses{$_} = $file for @possible_licenses;
-        $files->{$file}{license} = join ',', @possible_licenses;
+        if (@possible_licenses) {
+            @possible_licenses = map { s/^Software::License:://; $_ } @possible_licenses;
+            push @{$licenses{$_} ||= []}, $file for @possible_licenses;
+            $me->d->{files_hash}{$file}{license} = join ',', @possible_licenses;
+        } else {
+            $me->d->{unknown_license_texts}{$file} = join "\n", @unknown_license_texts if @unknown_license_texts;
+        }
     }
     if (%licenses) {
         $me->d->{licenses} = \%licenses;
@@ -97,7 +102,7 @@ sub analyse {
         if (@possible_licenses == 1) {
             my ($type) = @possible_licenses;
             $me->d->{license_type} = $type;
-            $me->d->{license_file} = $licenses{$type};
+            $me->d->{license_file} = join ',', @{$licenses{$type}};
         }
     }
 
@@ -110,7 +115,24 @@ sub analyse {
 
 sub kwalitee_indicators{
     return [
-         {
+        {
+            name=>'metayml_has_license',
+            error=>q{This distribution does not have a license defined in META.yml.},
+            remedy=>q{Define the license if you are using in Build.PL. If you are using MakeMaker (Makefile.PL) you should upgrade to ExtUtils::MakeMaker version 6.31.},
+            is_extra=>1,
+            code=>sub { 
+                my $d=shift;
+                my $yaml=$d->{meta_yml};
+                ($yaml->{license} and $yaml->{license} ne 'unknown') ? 1 : 0 },
+            details=>sub {
+                my $d = shift;
+                my $yaml = $d->{meta_yml};
+                return "No META.yml." unless $yaml;
+                return "No license was found in META.yml." unless $yaml->{license};
+                return "Unknown license was found in META.yml.";
+            },
+        },
+        {
             name=>'has_human_readable_license',
             error=>q{This distribution does not have a license defined in the documentation or in a file called LICENSE},
             remedy=>q{Add a section called "LICENSE" to the documentation, or add a file named LICENSE to the distribution.},
@@ -158,6 +180,22 @@ sub kwalitee_indicators{
                 return "LICENSE section was not found in the pod.";
             },
         },
+        {
+            name=>'has_known_license_in_source_file',
+            error=>q{Does not have license information in any of its source files, or the information is not recognized by Software::License},
+            remedy=>q{Add =head1 LICENSE and/or the proper text of the well-known license to the main module in your code.},
+            is_extra => 1,
+            code=>sub {
+                my $d = shift;
+                return 0 unless $d->{license_in_pod};
+                my @files_with_licenses = grep {$d->{files_hash}{$_}{license}} keys %{$d->{files_hash}};
+                return @files_with_licenses ? 1 : 0;
+            },
+            details=>sub {
+                my $d = shift;
+                return "LICENSE section was not found in the pod, or the license information was not recognized by Software::License.";
+            },
+        },
     ];
 }
 
@@ -175,7 +213,7 @@ Module::CPANTS::Kwalitee::License - Checks if there is a license
 
 =head1 SYNOPSIS
 
-Checks if the disttribution specifies a license.
+Checks if the distribution specifies a license.
 
 =head1 DESCRIPTION
 
@@ -189,13 +227,17 @@ Returns C<100>.
 
 =head3 analyse
 
-C<MCK::License> checks if there's a C<license> field C<META.yml>. Additionally, it looks for a file called LICENSE and a POD section namend LICENSE
+C<MCK::License> checks if there's a C<license> field C<META.yml>. Additionally, it looks for a file called LICENSE and a POD section named LICENSE
 
 =head3 kwalitee_indicators
 
 Returns the Kwalitee Indicators datastructure.
 
 =over
+
+=item * metayml_has_license
+
+=item * has_known_license_in_source_file
 
 =item * has_license_in_source_file
 
@@ -207,7 +249,7 @@ Returns the Kwalitee Indicators datastructure.
 
 =head2 License information
 
-Pleaces wher the licens information is taken from:
+Places where the license information is taken from:
 
 Has a LICENSE file   file_license 1|0
 

@@ -16,4 +16,10 @@ xt::kwalitee::Test::run(
 
   # has =head1 LICENSE followed by =head1 COPYRIGHT
   ['YSASAKI/App-pfswatch-0.08.tar.gz', 1],
+
+  # ignore inc/Devel/CheckLib
+  ['DJERIUS/Lua-API-0.02.tar.gz', 1],
+
+  # https://github.com/cpants/www-cpants/issues/44
+  ['NEILB/Business-CCCheck-0.09.tar.gz', 1],
 );

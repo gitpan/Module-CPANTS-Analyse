@@ -4,7 +4,8 @@ use strict;
 use File::Spec::Functions qw(catfile);
 use Array::Diff;
 
-our $VERSION = '0.92';
+our $VERSION = '0.93_01';
+$VERSION = eval $VERSION; ## no critic
 
 sub order { 100 }
 
@@ -16,10 +17,6 @@ sub analyse {
     my $class=shift;
     my $me=shift;
     
-    my @files=@{$me->d->{files_array} || []};
-    if (my $ignore = $me->d->{ignored_files_array}) {
-        push @files, @$ignore;
-    }
     my $distdir=$me->distdir;
     my $manifest_file=catfile($distdir,'MANIFEST');
 
@@ -41,7 +38,7 @@ sub analyse {
         close $fh;
 
         @manifest=sort @manifest;
-        my @files=sort @files;
+        my @files=sort keys %{$me->d->{files_hash} || {}};
 
         my $diff=Array::Diff->diff(\@manifest,\@files);
         if ($diff->count == 0) {
