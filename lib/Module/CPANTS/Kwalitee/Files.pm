@@ -6,7 +6,7 @@ use File::Spec::Functions qw(catdir catfile abs2rel splitdir);
 use File::stat;
 use File::Basename;
 
-our $VERSION = '0.93_01';
+our $VERSION = '0.93_02';
 $VERSION = eval $VERSION; ## no critic
 
 sub order { 15 }
@@ -33,7 +33,7 @@ sub analyse {
         no_chdir => 1,
         wanted => sub {
             my $name = $File::Find::name;
-            (my $path = $name) =~ s!^$distdir(?:/|$)!! or return;
+            (my $path = $name) =~ s!^\Q$distdir\E(?:/|$)!! or return;
             return if $path eq '';
 
             if (-d $name) {

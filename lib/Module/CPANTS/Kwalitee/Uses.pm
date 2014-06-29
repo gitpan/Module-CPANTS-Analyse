@@ -6,7 +6,7 @@ use Module::ExtractUse 0.33;
 use Set::Scalar qw();
 use version;
 
-our $VERSION = '0.93_01';
+our $VERSION = '0.93_02';
 $VERSION = eval $VERSION; ## no critic
 
 # These equivalents should be reasonably well-known and, preferably,
@@ -187,6 +187,7 @@ sub kwalitee_indicators {
 
                 for my $file (keys %$files) {
                     next unless exists $files->{$file}{module};
+                    next if $file =~ /\.pod$/;
                     my $module = $files->{$file}{module};
                     my %used;
                     for my $key (qw/used required/) {
@@ -225,6 +226,7 @@ sub kwalitee_indicators {
                 my @no_warnings;
                 for my $file (keys %$files) {
                     next unless exists $files->{$file}{module};
+                    next if $file =~ /\.pod$/;
                     my $module = $files->{$file}{module};
                     my %used;
                     for my $key (qw/used required/) {

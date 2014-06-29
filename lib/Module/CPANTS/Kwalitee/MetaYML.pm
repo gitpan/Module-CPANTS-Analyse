@@ -6,7 +6,7 @@ use CPAN::Meta::YAML;
 use CPAN::Meta::Validator;
 use List::Util qw/first/;
 
-our $VERSION = '0.93_01';
+our $VERSION = '0.93_02';
 $VERSION = eval $VERSION; ## no critic
 
 sub order { 10 }
@@ -137,7 +137,7 @@ sub kwalitee_indicators{
             name=>'metayml_has_provides',
             is_experimental=>1,
             error=>q{This distribution does not have a list of provided modules defined in META.yml.},
-            remedy=>q{Add all modules contained in this distribution to the META.yml field 'provides'. Module::Build does this automatically for you.},
+            remedy=>q{Add all modules contained in this distribution to the META.yml field 'provides'. Module::Build or Dist::Zilla::Plugin::MetaProvides do this automatically for you.},
             code=>sub { 
                 my $d=shift;
                 return 1 if $d->{meta_yml} && $d->{meta_yml}{provides};

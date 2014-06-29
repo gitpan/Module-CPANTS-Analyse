@@ -14,7 +14,7 @@ use IO::Capture::Stdout;
 use IO::Capture::Stderr;
 use CPAN::DistnameInfo;
 
-our $VERSION = '0.93_01';
+our $VERSION = '0.93_02';
 $VERSION = eval $VERSION; ## no critic
 
 # setup logger
@@ -138,29 +138,9 @@ sub calc_kwalitee {
 
     my $kwalitee=0;
     $me->d->{kwalitee}={};
-    my @aggregators;
     my %x_ignore = %{$me->x_opts->{ignore} || {}};
-    foreach my $mod (@{$me->mck->generators}) {
-        foreach my $i (@{$mod->kwalitee_indicators}) {
-            next if $i->{needs_db};
-            if ($i->{aggregating}) {
-                push @aggregators, $i;
-                next;
-            }
-
-            main::logger($i->{name});
-            my $rv=$i->{code}($me->d, $i);
-            $me->d->{kwalitee}{$i->{name}}=$rv;
-            if ($x_ignore{$i->{name}} && $i->{ignorable}) {
-                $me->d->{kwalitee}{$i->{name}} = 1;
-                if ($me->d->{error}{$i->{name}}) {
-                    $me->d->{error}{$i->{name}} .= ' [ignored]';
-                }
-            }
-            $kwalitee+=$rv;
-        }
-    }
-    foreach my $i (@aggregators) {
+    foreach my $i ($me->mck->get_indicators) {
+        next if $i->{needs_db};
         main::logger($i->{name});
         my $rv=$i->{code}($me->d, $i);
         $me->d->{kwalitee}{$i->{name}}=$rv;
