@@ -4,9 +4,11 @@ use strict;
 use File::Spec::Functions qw(catfile);
 use CPAN::Meta::YAML;
 use CPAN::Meta::Validator;
+use CPAN::Meta::Converter;
+use JSON::MaybeXS;
 use List::Util qw/first/;
 
-our $VERSION = '0.93_02';
+our $VERSION = '0.93_03';
 $VERSION = eval $VERSION; ## no critic
 
 sub order { 10 }
@@ -21,97 +23,107 @@ sub analyse {
     my $class=shift;
     my $me=shift;
     my $distdir=$me->distdir;
-    my $meta_yml=catfile($distdir,'META.yml');
+    my $meta_yml   = catfile($distdir,'META.yml');
+    my $meta_json  = catfile($distdir,'META.json');
+    my $mymeta_yml = catfile($distdir,'MYMETA.yml');
 
     # META.yml is not always the most preferred meta file,
     # but test it anyway because it may be broken sometimes.
     if (-f $meta_yml) {
-        eval {
-            my $yaml = _slurp_utf8($meta_yml, $me);
-            my $meta = CPAN::Meta::YAML->read_string($yaml) or die CPAN::Meta::YAML->errstr;
-            # Broken META.yml may return a "YAML 1.0" string first.
-            # eg. M/MH/MHASCH/Date-Gregorian-0.07.tar.gz
-            if (@$meta > 1 or ref $meta->[0] ne ref {}) {
-                $me->d->{meta_yml}=first { ref $_ eq ref {} } @$meta;
-                $me->d->{error}{metayml_is_parsable}="multiple parts found in META.yml";
-            } else {
-                $me->d->{meta_yml}=$meta->[0];
-                $me->d->{metayml_is_parsable}=1;
-            }
-        };
-        if (my $error = $@) {
-            $error =~ s/ at \S+ line \d+.+$//s;
-            $me->d->{error}{metayml_is_parsable}=$error;
-        }
+        _analyse_yml($me, $meta_yml);
     } else {
-        $me->d->{error}{metayml_is_parsable}="META.yml was not found";
+        $me->d->{error}{meta_yml_is_parsable}="META.yml was not found";
     }
 
-    # If there's no META.yml, or META.yml has some errors,
-    # check META.json.
+    # check also META.json (if exists).
+    if (-f $meta_json) {
+        _analyse_json($me, $meta_json);
+    }
+
+    # If, and only if META.yml and META.json don't exist,
+    # try MYMETA.yml
+    if (!$me->d->{meta_yml} && -f $mymeta_yml) {
+        _analyse_yml($me, $mymeta_yml);
+    }
+
     if (!$me->d->{meta_yml}) {
-        unless ($JSON_CLASS) {
-            for (qw/JSON::XS JSON::PP/) {
-                if (eval "require $_; 1;") { ## no critic
-                    $JSON_CLASS = $_;
-                    last;
-                }
-            }
-        }
+        return;
+    }
 
-        my $meta_json = catfile($distdir,'META.json');
-        if ($JSON_CLASS && -f $meta_json) {
-            eval {
-                my $json = _slurp_utf8($meta_json, $me);
-                my $meta = $JSON_CLASS->new->utf8->decode($json);
-                $me->d->{meta_yml} = $meta;
-                $me->d->{metayml_is_parsable} = 1;
-            };
-            if ($@) {
-                $me->d->{error}{metajson_is_parsable} = $@;
-            }
+    # Theoretically it might be better to convert 1.* to 2.0.
+    # However, converting 2.0 to 1.4 is much cheaper for CPANTS
+    # website as it's much rarer as of this writing.
+    if (($me->d->{meta_yml_spec_version} || '1.0') gt '1.4') {
+        my $cmc = CPAN::Meta::Converter->new($me->d->{meta_yml});
+        my $meta_14 = eval { $cmc->convert(version => '1.4') };
+        if (!$@ && $meta_14) {
+            $me->d->{meta_yml} = $meta_14;
         }
     }
 
-    # If we still don't have meta data, try MYMETA.yml as we may be
-    # testing a local distribution.
-    if (!$me->d->{meta_yml}) {
-        my $mymeta_yml = catfile($distdir, 'MYMETA.yml');
-        if (-f $mymeta_yml) {
-            eval {
-                my $yaml = _slurp_utf8($mymeta_yml, $me);
-                my $meta = CPAN::Meta::YAML->read_string($yaml) or die CPAN::Meta::YAML->errstr;
-                $me->d->{meta_yml}=first { ref $_ eq ref {} } @$meta;
-                $me->d->{metayml_is_parsable} = 1;
-            };
-        }
-    }
-
-    # Should we still try MYMETA.json?
-
-    my $meta = $me->d->{meta_yml};
-    return unless $meta && ref $meta eq ref {};
-
-    my $spec = eval { CPAN::Meta::Validator->new($meta) };
-    if ($@ or !$spec->is_valid) {
-        $me->d->{error}{metayml_conforms_to_known_spec} = $@ ? $@ : join ';', sort $spec->errors;
-    }
-
-    $me->d->{dynamic_config} = $meta->{dynamic_config} ? 1 : 0;
+    $me->d->{dynamic_config} = $me->d->{meta_yml}{dynamic_config} ? 1 : 0;
 }
 
-sub _slurp_utf8 {
-    my ($file, $me) = @_;
-    my $warning;
-    local $SIG{__WARN__} = sub { $warning = shift };
-    open my $fh, '<:encoding(UTF-8)', $file or die "$file: $!"; ## no critic
-    local $/;
-    my $content = <$fh>;
-    if ($warning) {
-        $warning =~ s/ at .+? line \d+.*$//s;
-        $me->d->{error}{metayml_is_parsable} = $warning;
+sub _analyse_yml {
+    my ($me, $file) = @_;
+    eval {
+        my $meta = CPAN::Meta::YAML->read($file) or die CPAN::Meta::YAML->errstr;
+        # Broken META.yml may return a "YAML 1.0" string first.
+        # eg. M/MH/MHASCH/Date-Gregorian-0.07.tar.gz
+        if (@$meta > 1 or ref $meta->[0] ne ref {}) {
+            $me->d->{meta_yml}=first { ref $_ eq ref {} } @$meta;
+            $me->d->{error}{meta_yml_is_parsable}="multiple parts found in META.yml";
+        } else {
+            $me->d->{meta_yml}=$meta->[0];
+            $me->d->{meta_yml_is_parsable}=1;
+        }
+    };
+    if (my $error = $@) {
+        $error =~ s/ at \S+ line \d+.+$//s;
+        $me->d->{error}{meta_yml_is_parsable}=$error;
     }
-    return $content;
+    if ($me->d->{meta_yml}) {
+        my ($spec, $error) = _validate_meta($me->d->{meta_yml});
+        $me->d->{error}{meta_yml_conforms_to_known_spec} = $error if $error;
+        $me->d->{meta_yml_spec_version} = $spec->{spec};
+    }
+}
+
+sub _analyse_json {
+    my ($me, $file) = @_;
+
+    my $meta;
+    eval {
+        my $json = do { open my $fh, '<', $file or die "$file: $!"; local $/; <$fh> };
+        $meta = decode_json($json);
+        $me->d->{meta_json_is_parsable} = 1;
+    };
+    if (my $error = $@) {
+        $error =~ s/ at \S+ line \d+.+$//s;
+        $me->d->{error}{meta_json_is_parsable} = $error;
+    }
+    if ($meta) {
+        my ($spec, $error) = _validate_meta($meta);
+        $me->d->{error}{meta_json_conforms_to_known_spec} = $error if $error;
+        $me->d->{meta_json_spec_version} = $spec->{spec};
+    }
+    if (!$me->d->{meta_yml}) {
+        $me->d->{meta_yml} = $meta;
+        $me->d->{meta_yml_spec_version} = $me->d->{meta_json_spec_version};
+        $me->d->{meta_yml_is_meta_json} = 1;
+    }
+}
+
+sub _validate_meta {
+    my $meta = shift;
+    my $error;
+    my $spec = eval { CPAN::Meta::Validator->new($meta) };
+    if ($error = $@) {
+        $error =~ s/ at \S+ line \d+.+$//s;
+    } elsif (!$spec->is_valid) {
+        $error = join ';', sort $spec->errors;
+    }
+    return ($spec, $error);
 }
 
 ##################################################################
@@ -121,20 +133,33 @@ sub _slurp_utf8 {
 sub kwalitee_indicators{
     return [
         {
-            name=>'metayml_is_parsable',
+            name=>'meta_yml_is_parsable',
             error=>q{The META.yml file of this distribution could not be parsed by the version of CPAN::Meta::YAML.pm CPANTS is using.},
             remedy=>q{If you don't have one, add a META.yml file. Else, upgrade your YAML generator so it produces valid YAML.},
             code=>sub {
                 my $d = shift;
-                !$d->{error}{metayml_is_parsable} && $d->{metayml_is_parsable} ? 1 : 0
+                !$d->{error}{meta_yml_is_parsable} && $d->{meta_yml_is_parsable} ? 1 : 0
             },
             details=>sub {
                 my $d = shift;
-                $d->{error}{metayml_is_parsable};
+                $d->{error}{meta_yml_is_parsable};
             },
         },
         {
-            name=>'metayml_has_provides',
+            name=>'meta_json_is_parsable',
+            error=>q{The META.json file of this distribution could not be parsed by the version of JSON parser CPANTS is using.},
+            remedy=>q{Upgrade your META.json generator so it produces valid JSON.},
+            code=>sub {
+                my $d = shift;
+                !$d->{error}{meta_json_is_parsable} ? 1 : 0
+            },
+            details=>sub {
+                my $d = shift;
+                $d->{error}{meta_json_is_parsable};
+            },
+        },
+        {
+            name=>'meta_yml_has_provides',
             is_experimental=>1,
             error=>q{This distribution does not have a list of provided modules defined in META.yml.},
             remedy=>q{Add all modules contained in this distribution to the META.yml field 'provides'. Module::Build or Dist::Zilla::Plugin::MetaProvides do this automatically for you.},
@@ -150,24 +175,40 @@ sub kwalitee_indicators{
             },
         },
         {
-            name=>'metayml_conforms_to_known_spec',
+            name=>'meta_yml_conforms_to_known_spec',
             error=>q{META.yml does not conform to any recognised META.yml Spec.},
             remedy=>q{Take a look at the META.yml Spec at http://module-build.sourceforge.net/META-spec-v1.4.html (for version 1.4) or http://search.cpan.org/perldoc?CPAN::Meta::Spec (for version 2), and change your META.yml accordingly.},
             code=>sub {
                 my $d=shift;
-                return 0 if $d->{error}{metayml_is_parsable};
-                return 0 if $d->{error}{metayml_conforms_to_known_spec};
+                return 0 if $d->{error}{meta_yml_is_parsable};
+                return 0 if $d->{error}{meta_yml_conforms_to_known_spec};
                 return 1;
             },
             details=>sub {
                 my $d = shift;
                 return "No META.yml." unless $d->{meta_yml};
-                return "META.yml is broken." unless $d->{metayml_is_parsable};
-                return $d->{error}{metayml_conforms_to_known_spec};
+                return "META.yml is broken." unless $d->{meta_yml_is_parsable};
+                return $d->{error}{meta_yml_conforms_to_known_spec};
             },
         },
         {
-            name=>'metayml_declares_perl_version',
+            name=>'meta_json_conforms_to_known_spec',
+            error=>q{META.json does not conform to any recognised META Spec.},
+            remedy=>q{Take a look at the META.json Spec at http://module-build.sourceforge.net/META-spec-v1.4.html (for version 1.4) or http://search.cpan.org/perldoc?CPAN::Meta::Spec (for version 2), and change your META.json accordingly.},
+            code=>sub {
+                my $d=shift;
+                return 0 if $d->{error}{meta_json_is_parsable};
+                return 0 if $d->{error}{meta_json_conforms_to_known_spec};
+                return 1;
+            },
+            details=>sub {
+                my $d = shift;
+                return "META.json is broken." unless $d->{meta_json_is_parsable};
+                return $d->{error}{meta_json_conforms_to_known_spec};
+            },
+        },
+        {
+            name=>'meta_yml_declares_perl_version',
             error=>q{This distribution does not declare the minimum perl version in META.yml.},
             is_extra=>1,
             remedy=>q{If you are using Build.PL define the {requires}{perl} = VERSION field. If you are using MakeMaker (Makefile.PL) you should upgrade ExtUtils::MakeMaker to 6.48 and use MIN_PERL_VERSION parameter. Perl::MinimumVersion can help you determine which version of Perl your module needs.},
@@ -182,6 +223,24 @@ sub kwalitee_indicators{
                 return "No META.yml." unless $yaml;
                 return q{No "requires" was found in META.yml.} unless ref $yaml->{requires} eq ref {};
                 return q{No "perl" subkey was found in META.yml.} unless $yaml->{requires}{perl};
+            },
+        },
+        {
+            name=>'meta_yml_has_repository_resource',
+            is_experimental=>1,
+            error=>q{This distribution does not have a link to a repository in META.yml.},
+            remedy=>q{Add a 'repository' resource to the META.yml via 'meta_add' accessor (for Module::Build) or META_ADD parameter (for ExtUtils::MakeMaker).},
+            code=>sub { 
+                my $d=shift;
+                my $yaml = $d->{meta_yml};
+                return ref $yaml->{resources} eq ref {} && $yaml->{resources}{repository} ? 1 : 0;
+            },
+            details=>sub {
+                my $d = shift;
+                my $yaml = $d->{meta_yml};
+                return "No META.yml." unless $yaml;
+                return q{No "resources" was found in META.yml.} unless ref $yaml->{resources} eq ref {};
+                return q{No "repository" subkey was found in META.yml.} unless $yaml->{resources}{repository};
             },
         },
     ];
@@ -223,13 +282,19 @@ Returns the Kwalitee Indicators datastructure.
 
 =over
 
-=item * metayml_is_parsable
+=item * meta_yml_is_parsable
 
-=item * metayml_has_provides
+=item * meta_yml_has_provides
 
-=item * metayml_conforms_to_known_spec
+=item * meta_yml_conforms_to_known_spec
 
-=item * metayml_declares_perl_version
+=item * meta_yml_declares_perl_version
+
+=item * meta_yml_has_repository_resource
+
+=item * meta_json_is_parsable
+
+=item * meta_json_conforms_to_known_spec
 
 =back
 

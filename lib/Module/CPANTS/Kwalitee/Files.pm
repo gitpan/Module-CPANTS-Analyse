@@ -6,7 +6,7 @@ use File::Spec::Functions qw(catdir catfile abs2rel splitdir);
 use File::stat;
 use File::Basename;
 
-our $VERSION = '0.93_02';
+our $VERSION = '0.93_03';
 $VERSION = eval $VERSION; ## no critic
 
 sub order { 15 }
@@ -37,10 +37,10 @@ sub analyse {
             return if $path eq '';
 
             if (-d $name) {
+                $dirs{$path} ||= {};
                 if (-l $name) {
                     $dirs{$path}{symlink} = 1;
                 }
-                $dirs{$path} = {};
                 push @dirs_array, $path;
                 return;
             }
@@ -91,9 +91,9 @@ sub analyse {
     $me->d->{size_unpacked}=$size;
     $me->d->{latest_mtime}=$latest_mtime;
 
-    my @symlinks = (
-        grep({ $files{$_}{symlink} } sort keys %files),
-        grep({ $dirs{$_}{symlink} } sort keys %dirs)
+    my @symlinks = sort {$a cmp $b} (
+        grep({ $files{$_}{symlink} } keys %files),
+        grep({ $dirs{$_}{symlink} } keys %dirs)
     );
 
     if (@symlinks) {

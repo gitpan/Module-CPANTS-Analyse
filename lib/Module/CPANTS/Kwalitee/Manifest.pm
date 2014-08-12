@@ -4,7 +4,7 @@ use strict;
 use File::Spec::Functions qw(catfile);
 use Array::Diff;
 
-our $VERSION = '0.93_02';
+our $VERSION = '0.93_03';
 $VERSION = eval $VERSION; ## no critic
 
 sub order { 100 }
@@ -51,6 +51,17 @@ sub analyse {
                 "Missing in MANIFEST: ".join(', ',@{$diff->added}), 
                 "Missing in Dist: " . join(', ',@{$diff->deleted}));
             $me->d->{error}{manifest_matches_dist} = \@error;
+        }
+
+        # Tweak symlinks error for a local distribution (RT #97858)
+        if ($me->d->{is_local_distribution} && $me->d->{error}{symlinks}) {
+            my %manifested = map {$_ => 1} @manifest;
+            my @symlinks = grep {$manifested{$_}} split ',', $me->d->{error}{symlinks};
+            if (@symlinks) {
+                $me->d->{error}{symlinks} = join ',', @symlinks;
+            } else {
+                delete $me->d->{error}{symlinks};
+            }
         }
     }
     else {
