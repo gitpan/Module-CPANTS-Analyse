@@ -3,7 +3,7 @@ use warnings;
 use strict;
 use File::Spec::Functions;
 
-our $VERSION = '0.93_03';
+our $VERSION = '0.93_04';
 $VERSION = eval $VERSION; ## no critic
 
 sub order { 30 }
@@ -99,7 +99,14 @@ sub analyse {
             }
         }
     }
-    
+
+    for my $file (keys %{$me->d->{files_hash}}) {
+        next unless $file =~ /^inc\/(.+)\.pm/;
+        my $module = $1;
+        $module =~ s|/|::|g;
+        push @{$me->d->{included_modules} ||= []}, $module;
+    }
+
     return 1;
 }
 

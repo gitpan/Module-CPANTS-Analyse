@@ -4,7 +4,7 @@ use strict;
 use File::Spec::Functions qw/catfile/;
 use Encode;
 
-our $VERSION = '0.93_03';
+our $VERSION = '0.93_04';
 $VERSION = eval $VERSION; ## no critic
 
 our @ABSTRACT_STUBS = (
@@ -73,7 +73,7 @@ sub _parse_abstract {
     }
 
     my $error;
-    if ($encoding) {
+    if ($encoding && $abstract) {
         my $encoder = find_encoding($encoding);
         if (!$encoder) {
             $error = "unknown encoding: $encoding";

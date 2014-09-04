@@ -4,7 +4,7 @@ use strict;
 use File::Spec::Functions qw(catfile);
 use Software::LicenseUtils;
 
-our $VERSION = '0.93_03';
+our $VERSION = '0.93_04';
 $VERSION = eval $VERSION; ## no critic
 
 sub order { 100 }
@@ -31,7 +31,7 @@ sub analyse {
     my $files = $me->d->{files_array} || [];
 
     # check if there's a LICEN[CS]E file
-    if (my ($file) = grep {$_ =~ /^LICEN[CS]E$/} @$files) {
+    if (my ($file) = grep {$_ =~ /^(?:LICEN[CS]E|COPYING)$/} @$files) {
         $me->d->{license} .= " defined in $file";
         $me->d->{external_license_file}=$file;
     }
