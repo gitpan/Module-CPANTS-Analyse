@@ -6,12 +6,12 @@ author:
 build_requires:
   Cwd: '0'
   ExtUtils::MakeMaker: '0'
+  Test::FailWarnings: '0'
   Test::More: '0.88'
-  Test::Warnings: '0'
 configure_requires:
   ExtUtils::MakeMaker::CPANfile: '0.06'
 dynamic_config: 0
-generated_by: 'ExtUtils::MakeMaker version 6.98, CPAN::Meta::Converter version 2.142060'
+generated_by: 'ExtUtils::MakeMaker version 6.98, CPAN::Meta::Converter version 2.140640'
 keywords:
   - CPANTS
   - kwalitee
@@ -45,4 +45,4 @@ resources:
   bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=Module-CPANTS-Analyse
   homepage: http://cpants.cpanauthors.org
   repository: https://github.com/cpants/Module-CPANTS-Analyse
-version: '0.94'
+version: '0.95'

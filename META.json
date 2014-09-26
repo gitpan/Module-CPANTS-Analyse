@@ -5,7 +5,7 @@
       "Kenichi Ishigaki <ishigaki@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "ExtUtils::MakeMaker version 6.98, CPAN::Meta::Converter version 2.142060",
+   "generated_by" : "ExtUtils::MakeMaker version 6.98, CPAN::Meta::Converter version 2.140640",
    "keywords" : [
       "CPANTS",
       "kwalitee"
@@ -29,8 +29,8 @@
          "requires" : {
             "Cwd" : "0",
             "ExtUtils::MakeMaker" : "0",
-            "Test::More" : "0.88",
-            "Test::Warnings" : "0"
+            "Test::FailWarnings" : "0",
+            "Test::More" : "0.88"
          }
       },
       "configure" : {
@@ -69,5 +69,5 @@
          "url" : "https://github.com/cpants/Module-CPANTS-Analyse"
       }
    },
-   "version" : "0.94"
+   "version" : "0.95"
 }
