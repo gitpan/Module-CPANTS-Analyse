@@ -29,7 +29,7 @@
          "requires" : {
             "Cwd" : "0",
             "ExtUtils::MakeMaker" : "0",
-            "Test::More" : "0",
+            "Test::More" : "0.88",
             "Test::Warnings" : "0"
          }
       },
@@ -59,7 +59,7 @@
          }
       }
    },
-   "release_status" : "testing",
+   "release_status" : "stable",
    "resources" : {
       "bugtracker" : {
          "web" : "https://rt.cpan.org/Public/Dist/Display.html?Name=Module-CPANTS-Analyse"
@@ -69,5 +69,5 @@
          "url" : "https://github.com/cpants/Module-CPANTS-Analyse"
       }
    },
-   "version" : "0.93_04"
+   "version" : "0.94"
 }

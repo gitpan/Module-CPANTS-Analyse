@@ -6,7 +6,7 @@ author:
 build_requires:
   Cwd: '0'
   ExtUtils::MakeMaker: '0'
-  Test::More: '0'
+  Test::More: '0.88'
   Test::Warnings: '0'
 configure_requires:
   ExtUtils::MakeMaker::CPANfile: '0.06'
@@ -45,4 +45,4 @@ resources:
   bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=Module-CPANTS-Analyse
   homepage: http://cpants.cpanauthors.org
   repository: https://github.com/cpants/Module-CPANTS-Analyse
-version: 0.93_04
+version: '0.94'
