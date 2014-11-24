@@ -4,12 +4,13 @@ use strict;
 use File::Spec::Functions qw/catfile/;
 use Encode;
 
-our $VERSION = '0.95';
+our $VERSION = '0.96';
 $VERSION = eval $VERSION; ## no critic
 
 our @ABSTRACT_STUBS = (
   q{Perl extension for blah blah blah}, # h2xs
   q{[One line description of module's purpose here]}, # Module::Starter etc
+  q{The great new}, # Module::Starter
   q{It's new $module}, # Minilla
 );
 
@@ -149,7 +150,7 @@ Module::CPANTS::Kwalitee::Pod - Check Pod
 
 =head1 SYNOPSIS
 
-The check in this module has moved to L<Module::CPANTS::SiteKwalitee::Pod> to double-check the pod correctness on the server side.
+Some of the check in this module has moved to L<Module::CPANTS::SiteKwalitee::Pod|https://github.com/cpants/Module-CPANTS-SiteKwalitee> to double-check the pod correctness on the server side.
 
 If you do care, it is recommended to add a test to test pod (with L<Test::Pod>) in "xt/" directory in your distribution.
 
@@ -165,7 +166,7 @@ Returns C<100>.
 
 =head3 analyse
 
-Does nothing now.
+Parses pod to see if it has a proper abstract.
 
 =head3 kwalitee_indicators
 

@@ -9,12 +9,11 @@ use File::Copy;
 use File::stat;
 use Archive::Any::Lite;
 use Carp;
-use Module::CPANTS::Kwalitee;
 use IO::Capture::Stdout;
 use IO::Capture::Stderr;
 use CPAN::DistnameInfo;
 
-our $VERSION = '0.95';
+our $VERSION = '0.96';
 $VERSION = eval $VERSION; ## no critic
 
 # setup logger
@@ -24,11 +23,14 @@ if (! main->can('logger')) {
     };
 }
 
-use Module::Pluggable search_path=>['Module::CPANTS::Kwalitee'];
-
 __PACKAGE__->mk_accessors(qw(dist opts tarball distdir d mck capture_stdout capture_stderr));
 __PACKAGE__->mk_accessors(qw(_testdir _dont_cleanup _tarball _x_opts));
 
+sub import {
+    my $class = shift;
+    require Module::CPANTS::Kwalitee;
+    Module::CPANTS::Kwalitee->import(@_);
+}
 
 sub new {
     my $class=shift;

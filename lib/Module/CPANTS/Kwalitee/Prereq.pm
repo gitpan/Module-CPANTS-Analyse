@@ -4,7 +4,7 @@ use strict;
 use File::Spec::Functions qw(catfile);
 use Text::Balanced qw/extract_bracketed/;
 
-our $VERSION = '0.95';
+our $VERSION = '0.96';
 $VERSION = eval $VERSION; ## no critic
 
 sub order { 100 }
@@ -312,7 +312,7 @@ Module::CPANTS::Kwalitee::Prereq - Checks listed prerequisites
 
 =head1 SYNOPSIS
 
-The metrics in this module have moved to L<Module::CPANTS::SiteKwalitee::Prereq>.
+The metrics in this module have moved to L<Module::CPANTS::SiteKwalitee::Prereq|https://github.com/cpants/Module-CPANTS-SiteKwalitee>.
 
 =head1 DESCRIPTION
 
@@ -326,7 +326,7 @@ Returns C<100>.
 
 =head3 analyse
 
-Does nothing now.
+Find information on prerequisite distributions from meta files etc.
 
 =head3 kwalitee_indicators
 

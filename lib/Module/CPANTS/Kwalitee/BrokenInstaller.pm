@@ -1,11 +1,9 @@
 package Module::CPANTS::Kwalitee::BrokenInstaller;
 use warnings;
 use strict;
-use File::Find;
-use File::Spec::Functions qw(catdir catfile abs2rel);
-use File::stat;
+use File::Spec::Functions qw(catfile);
 
-our $VERSION = '0.95';
+our $VERSION = '0.96';
 $VERSION = eval $VERSION; ## no critic
 
 sub order { 100 }
